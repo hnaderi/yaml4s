@@ -11,12 +11,13 @@ ThisBuild / developers := List(
 ThisBuild / tlSonatypeUseLegacyHost := false
 
 ThisBuild / tlSitePublishBranch := Some("main")
+ThisBuild / tlCiReleaseBranches := Nil
 
 val Scala3 = "3.2.2"
 
 ThisBuild / scalaVersion := Scala3
 
-lazy val root = project.in(file(".")).aggregate(core)
+lazy val root = project.in(file(".")).aggregate(core, docs)
 
 lazy val core = project
   .in(file("core"))
