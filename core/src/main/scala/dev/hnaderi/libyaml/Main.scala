@@ -42,7 +42,6 @@ object Main {
     if (yaml_parser_load(parser, document) == 0)
       println("Failed to load document!")
 
-    val ytg = YamlTreeGenerator()
     val doc = LibYamlDocument(document)
 
     println("Tree:")
