@@ -88,4 +88,16 @@ object YAML {
   def mapping(values: IterableOnce[(String, YAML)]): Mapping = new Mapping(
     mutable.Map.from(values)
   )
+
+  given Writer[YAML] = new {
+    def ynull: YAML = Null
+    def yfalse: YAML = apply("false")
+    def ytrue: YAML = apply("true")
+    def ynum(s: CharSequence, decIndex: Int, expIndex: Int): YAML = apply(
+      s.toString()
+    )
+    def ystring(s: CharSequence): YAML = apply(s.toString())
+    def yarray(vs: List[YAML]): YAML = sequence(vs)
+    def yobject(vs: Map[String, YAML]): YAML = mapping(vs)
+  }
 }

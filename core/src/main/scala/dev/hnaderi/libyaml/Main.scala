@@ -20,6 +20,7 @@ import _root_.scala.scalanative.unsafe.*
 import _root_.scala.scalanative.unsigned.*
 import dev.hnaderi.libyaml.aliases.yaml_node_type_t
 
+import scala.collection.mutable
 import scala.scalanative.runtime.libc
 
 import all.*
@@ -43,10 +44,9 @@ object Main {
 
     val ytg = YamlTreeGenerator()
     val doc = LibYamlDocument(document)
-    doc.visit(ytg)
 
     println("Tree:")
-    println(ytg.build)
+    println(doc.visit[YAML])
 
     doc.clean
     yaml_parser_delete(parser)
@@ -60,7 +60,7 @@ trait YAMLParser {
 }
 
 trait YAMLDocument {
-  def visit(visitor: YamlNodeVisitor): Unit
+  def visit[T: Writer]: T
 
   def clean: Unit
 }
@@ -75,34 +75,32 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
   override def clean: Unit =
     yaml_document_delete(document)
 
-  override def visit(visitor: YamlNodeVisitor): Unit = Zone { implicit zone =>
+  override def visit[T](using w: Writer[T]): T = Zone { implicit zone =>
     val root = yaml_document_get_root_node(document)
-    visitNode(document, root, visitor)
+    visitNode(document, root)
   }
 
-  private def visitNode(
+  private def visitNode[T](
       document: Ptr[yaml_document_t],
-      root: Ptr[yaml_node_t],
-      visitor: YamlNodeVisitor
-  )(using Zone): Unit = {
+      root: Ptr[yaml_node_t]
+  )(using Zone)(using w: Writer[T]): T = {
     val node = !root
     val nodeType = yaml_node_type_t(node.`type`)
 
     nodeType match {
       case yaml_node_type_e.YAML_MAPPING_NODE =>
-        visitMapping(document, node.data.mapping, visitor.mapping())
+        w.yobject(visitMapping(document, node.data.mapping))
       case yaml_node_type_e.YAML_SEQUENCE_NODE =>
-        visitSeq(document, node.data.sequence, visitor.seq())
+        w.yarray(visitSeq(document, node.data.sequence))
       case yaml_node_type_e.YAML_SCALAR_NODE =>
-        visitScalar(node.data.scalar, visitor.scalar())
+        visitScalar(node.data.scalar)
       case yaml_node_type_e.YAML_NO_NODE =>
         println("No node!!!")
+        ???
     }
-
-    val nodes = (!root).data
   }
 
-  private def scalarValue(node: yaml_node_t.Union0.Struct0): String = {
+  private def stringValue(node: yaml_node_t.Union0.Struct0): String = {
     val bytes = new Array[Byte](node.length.toInt)
     val value = node.value.asInstanceOf[CString]
     libc.memcpy(bytes.at(0), value, node.length)
@@ -110,51 +108,49 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
     new String(bytes)
   }
 
-  private def visitScalar(
-      node: yaml_node_t.Union0.Struct0,
-      visitor: YamlScalarVisitor
-  ): Unit =
-    visitor.write(scalarValue(node))
+  private def visitScalar[T](
+      node: yaml_node_t.Union0.Struct0
+  )(using w: Writer[T]): T =
+    w.ystring(stringValue(node))
 
-  private def visitSeq(
+  private def visitSeq[T](
       document: Ptr[yaml_document_t],
-      node: yaml_node_t.Union0.Struct1,
-      visitor: YamlSequenceVisitor
-  )(using Zone): Unit = {
+      node: yaml_node_t.Union0.Struct1
+  )(using Zone)(using w: Writer[T]): List[T] = {
     val items = node.items
     var cur = items.start
+    val result = mutable.ListBuffer.empty[T]
     while (cur.toLong < items.top.toLong) {
       val idx = (!cur).value
       val node = yaml_document_get_node(document, idx)
-      visitNode(document, node, visitor.next())
+      result.addOne(visitNode(document, node))
       cur = cur + 1
     }
 
-    visitor.`end`()
+    result.toList
   }
 
-  private def visitMapping(
+  private def visitMapping[T](
       document: Ptr[yaml_document_t],
-      node: yaml_node_t.Union0.Struct2,
-      visitor: YamlMappingVisitor
-  )(using
-      Zone
-  ): Unit = {
+      node: yaml_node_t.Union0.Struct2
+  )(using Zone)(using w: Writer[T]): Map[String, T] = {
     val items = node.pairs
     var cur = items.start
+    val result = mutable.Map.empty[String, T]
     while (cur.toLong < items.top.toLong) {
       val keyIdx = (!cur).key
-      val key = yaml_document_get_node(document, keyIdx)
-      assert((!key).`type` == yaml_node_type_e.YAML_SCALAR_NODE)
+      val nodeKey = yaml_document_get_node(document, keyIdx)
+      assert((!nodeKey).`type` == yaml_node_type_e.YAML_SCALAR_NODE)
 
-      val current = visitor.at(scalarValue((!key).data.scalar))
+      val key = stringValue((!nodeKey).data.scalar)
 
       val idx = (!cur).value
       val node = yaml_document_get_node(document, idx)
-      visitNode(document, node, current)
+
+      result.addOne((key, visitNode(document, node)))
       cur = cur + 1
     }
 
-    visitor.`end`()
+    result.toMap
   }
 }
