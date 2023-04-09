@@ -28,7 +28,7 @@ import all.*
 object Main {
   def main(args: Array[String]): Unit = Zone { implicit zone =>
     val input =
-      scala.io.Source.fromFile("test.yaml").getLines().mkString("\n")
+      scala.io.Source.fromFile("data/test5.yaml").getLines().mkString("\n")
     val input_c = toCString(input).asInstanceOf[Ptr[CUnsignedChar]]
 
     val parser = yaml_parser_t()
@@ -109,8 +109,26 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
 
   private def visitScalar[T](
       node: yaml_node_t.Union0.Struct0
-  )(using w: Writer[T]): T =
-    w.ystring(stringValue(node))
+  )(using w: Writer[T]): T = {
+    import yaml_scalar_style_e.*
+    val style = node.style
+    val mustBeString = style match {
+      case YAML_SINGLE_QUOTED_SCALAR_STYLE | YAML_DOUBLE_QUOTED_SCALAR_STYLE |
+          YAML_FOLDED_SCALAR_STYLE =>
+        true
+      case _ => false
+    }
+
+    val str = stringValue(node)
+    if (mustBeString) w.ystring(str)
+    else
+      str match {
+        case "true" | "Yes" => w.ytrue
+        case "false" | "NO" => w.yfalse
+        // TODO numbers!
+        case other => w.ystring(str)
+      }
+  }
 
   private def visitSeq[T](
       document: Ptr[yaml_document_t],
