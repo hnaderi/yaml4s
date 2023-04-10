@@ -16,28 +16,8 @@
 
 package dev.hnaderi.libyaml
 
-object Main {
-  def main(args: Array[String]) = {
-    val input = """
-data:
-  double-quoted: "data"
-  single-quoted: 'data'
-  not quoted: data
-  folded: |
-    line 1
-    line 2
-  quoted: >
-    data 1
-    data 2
-    data 3
-  boolean 1: true
-  boolean 2: Yes
-  boolean 3: false
-  boolean 4: NO
-  not boolean 1: "Yes"
-  not boolean 2: "true"
-"""
-    val obj = JSYamlParser.parse[YAML](input)
-    println(obj)
-  }
+trait YAMLDocument {
+  def visit[T: Writer]: T
+
+  def clean: Unit
 }

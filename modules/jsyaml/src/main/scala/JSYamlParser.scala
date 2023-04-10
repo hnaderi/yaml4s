@@ -16,11 +16,19 @@
 
 package dev.hnaderi.libyaml
 
+import scala.util.Try
+
 import scalajs.js
 import scalajs.js.annotation.JSImport
 
-object JSYaml {
-  def load[T: Writer](str: String): T = convertAnyToJsonUnsafe(JS.load(str))
+object JSYamlParser extends Parser {
+
+  override def parse[T: Writer](input: String): Either[Throwable, T] =
+    Try(JS.load(input)).toEither.map(convertAnyToJsonUnsafe)
+
+  override def parseDocuments[T: Writer](
+      yaml: String
+  ): LazyList[Either[Throwable, T]] = ???
 
   private[this] def convertAnyToJsonUnsafe[T](
       input: Any
