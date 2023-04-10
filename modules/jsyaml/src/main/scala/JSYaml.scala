@@ -16,12 +16,17 @@
 
 package dev.hnaderi.libyaml
 
+import dev.hnaderi.libyaml.YAML.*
+
 import scala.util.Try
 
 import scalajs.js
 import scalajs.js.annotation.JSImport
+import js.JSConverters._
 
-object JSYamlParser extends Parser {
+object JSYaml extends Parser with Printer {
+
+  override def print(t: YAML): String = JS.dump(convertYAMLToJSUnsafe(t))
 
   override def parse[T: Writer](input: String): Either[Throwable, T] =
     Try(JS.load(input)).toEither.map(convertAnyToJsonUnsafe)
@@ -51,10 +56,24 @@ object JSYamlParser extends Parser {
     case other if js.isUndefined(other) => w.ynull
   }
 
+  private[this] def convertYAMLToJSUnsafe[T](input: YAML): js.Any =
+    input match {
+      case YString(value) => value
+      case YInt(value)    => value
+      case YLong(value)   => value.toDouble
+      case YDouble(value) => value
+      case YBool(value)   => value
+      case YArr(value)    => value.map(convertYAMLToJSUnsafe).toJSArray
+      case YObj(value) =>
+        value.map((k, v) => (k, convertYAMLToJSUnsafe(v))).toMap.toJSDictionary
+      case YNull => null
+    }
+
   @JSImport("js-yaml", JSImport.Namespace)
   @js.native
   private object JS extends js.Object {
     final def load(str: String): Any = js.native
     final def loadAll(str: String): js.Array[Any] = js.native
+    final def dump(obj: js.Any): String = js.native
   }
 }

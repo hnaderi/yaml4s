@@ -16,12 +16,12 @@
 
 package dev.hnaderi.libyaml
 
+import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.scalanative.unsafe.*
 import scala.scalanative.unsigned.*
 
 import all.*
-import scala.collection.mutable
-import scala.annotation.tailrec
 
 object LibyamlParser extends Parser {
 

@@ -41,7 +41,13 @@ data:
 ---
 {b: 2}
 """
-    val obj = JSYamlParser.parseDocuments[YAML](input)
-    println(obj)
+    val obj = JSYaml.parseDocuments[YAML](input)
+    obj.foreach { y =>
+      println(y)
+
+      println()
+
+      y.map(JSYaml.print).foreach(println)
+    }
   }
 }
