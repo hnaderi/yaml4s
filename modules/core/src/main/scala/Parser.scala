@@ -18,5 +18,5 @@ package dev.hnaderi.libyaml
 
 trait Parser {
   def parse[T: Writer](input: String): Either[Throwable, T]
-  def parseDocuments[T: Writer](yaml: String): LazyList[Either[Throwable, T]]
+  def parseDocuments[T: Writer](yaml: String): Either[Throwable, Iterable[T]]
 }

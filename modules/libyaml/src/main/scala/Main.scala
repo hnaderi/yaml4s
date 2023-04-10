@@ -24,7 +24,7 @@ object Main {
         .getLines()
         .mkString("\n")
 
-    val yaml = LibyamlParser.parse[YAML](input)
+    val yaml = LibyamlParser.parseDocuments[YAML](input)
     println(yaml)
   }
 }

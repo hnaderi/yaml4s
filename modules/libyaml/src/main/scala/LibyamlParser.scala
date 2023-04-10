@@ -20,6 +20,8 @@ import scala.scalanative.unsafe.*
 import scala.scalanative.unsigned.*
 
 import all.*
+import scala.collection.mutable
+import scala.annotation.tailrec
 
 object LibyamlParser extends Parser {
 
@@ -39,7 +41,7 @@ object LibyamlParser extends Parser {
 
         doc = LibYamlDocument(document)
 
-        result = doc.visit[T]
+        result <- doc.visit[T].toRight(NoDocument)
       } yield {
         doc.clean
         yaml_parser_delete(parser)
@@ -51,10 +53,45 @@ object LibyamlParser extends Parser {
     Either.cond(result != 0, (), err)
 
   override def parseDocuments[T: Writer](
-      yaml: String
-  ): LazyList[Either[Throwable, T]] = ???
+      input: String
+  ): Either[Throwable, Iterable[T]] = Zone { implicit zone =>
+    val input_c = toCString(input).asInstanceOf[Ptr[CUnsignedChar]]
+
+    val parser = yaml_parser_t()
+    val result = mutable.ListBuffer.empty[T]
+
+    handle(yaml_parser_initialize(parser), ParserInitFailed).flatMap(_ =>
+
+      yaml_parser_set_input_string(parser, input_c, input.size.toULong)
+      val document = yaml_document_t()
+      val doc = LibYamlDocument(document)
+
+      @tailrec
+      def go(): Either[Throwable, Iterable[T]] =
+        if (yaml_parser_load(parser, document) == 0)
+        then Left(DocumentLoadFailed)
+        else {
+          val t = doc.visit[T]
+          doc.clean
+
+          t match {
+            case None => Right(result)
+            case Some(value) =>
+              result.addOne(value)
+              go()
+          }
+        }
+
+      val out = go()
+      yaml_parser_delete(parser)
+      out
+    )
+
+  }
 
   case object ParserInitFailed extends Exception("Failed to initialize parser!")
   case object DocumentLoadFailed extends Exception("Failed to load document!")
+  case object NoDocument
+      extends Exception("Expected at least one document, but found none!")
 
 }

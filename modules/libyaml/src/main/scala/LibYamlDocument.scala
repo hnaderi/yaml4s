@@ -16,22 +16,24 @@
 
 package dev.hnaderi.libyaml
 
-import _root_.scala.scalanative.unsafe.*
-import _root_.scala.scalanative.unsigned.*
-import dev.hnaderi.libyaml.aliases.yaml_node_type_t
 import scala.collection.mutable
 import scala.scalanative.runtime.libc
+import scala.scalanative.unsafe.*
+import scala.scalanative.unsigned.*
+
 import all.*
 
 final class LibYamlDocument(private val document: Ptr[yaml_document_t])
-    extends YAMLDocument {
+    extends AnyVal {
 
-  override def clean: Unit =
+  def clean: Unit =
     yaml_document_delete(document)
 
-  override def visit[T](using w: Writer[T]): T = Zone { implicit zone =>
+  def visit[T](using w: Writer[T]): Option[T] = Zone { implicit zone =>
     val root = yaml_document_get_root_node(document)
-    visitNode(document, root)
+
+    if root == null then None
+    else Some(visitNode(document, root))
   }
 
   private def visitNode[T](
@@ -48,9 +50,6 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
         w.yarray(visitSeq(document, node.data.sequence))
       case yaml_node_type_e.YAML_SCALAR_NODE =>
         visitScalar(node.data.scalar)
-      case yaml_node_type_e.YAML_NO_NODE =>
-        println("No node!!!")
-        ???
     }
   }
 

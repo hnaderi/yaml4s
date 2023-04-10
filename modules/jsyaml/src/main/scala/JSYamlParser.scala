@@ -28,7 +28,8 @@ object JSYamlParser extends Parser {
 
   override def parseDocuments[T: Writer](
       yaml: String
-  ): LazyList[Either[Throwable, T]] = ???
+  ): Either[Throwable, Iterable[T]] =
+    Try(JS.loadAll(yaml)).toEither.map(_.map(convertAnyToJsonUnsafe))
 
   private[this] def convertAnyToJsonUnsafe[T](
       input: Any
@@ -54,5 +55,6 @@ object JSYamlParser extends Parser {
   @js.native
   private object JS extends js.Object {
     final def load(str: String): Any = js.native
+    final def loadAll(str: String): js.Array[Any] = js.native
   }
 }

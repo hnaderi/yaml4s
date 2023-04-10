@@ -36,8 +36,12 @@ data:
   boolean 4: NO
   not boolean 1: "Yes"
   not boolean 2: "true"
+---
+{a: 1}
+---
+{b: 2}
 """
-    val obj = JSYamlParser.parse[YAML](input)
+    val obj = JSYamlParser.parseDocuments[YAML](input)
     println(obj)
   }
 }
