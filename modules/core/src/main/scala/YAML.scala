@@ -16,77 +16,108 @@
 
 package dev.hnaderi.libyaml
 
-import scala.collection.mutable
-
-sealed trait YAML extends Any
+sealed trait YAML extends Any {
+  def foldTo[T: Writer]: T
+}
 object YAML {
-  case object Null extends YAML
-  final class Scalar private[YAML] (val value: String)
+  final case class YString(value: String) extends AnyVal with YAML {
+    def foldTo[T](implicit b: Writer[T]): T = b.ystring(value)
+  }
+  final case class YInt(value: Int) extends AnyVal with YAML {
+    def foldTo[T](implicit b: Writer[T]): T = b.yint(value)
+  }
+  final case class YLong(value: Long) extends AnyVal with YAML {
+    def foldTo[T](implicit b: Writer[T]): T = b.ylong(value)
+  }
+  final case class YDouble(value: Double) extends AnyVal with YAML {
+    def foldTo[T](implicit b: Writer[T]): T = b.ydouble(value)
+  }
+  final case class YBool(value: Boolean) extends AnyVal with YAML {
+    def foldTo[T](implicit b: Writer[T]): T = b.ybool(value)
+  }
+  final case class YArr(value: Iterable[YAML]) extends AnyVal with YAML {
+    def foldTo[T](implicit b: Writer[T]): T = b.yarray(value.map(_.foldTo[T]))
+  }
+  final case class YObj(value: Iterable[(String, YAML)])
       extends AnyVal
       with YAML {
-    override def toString(): String = value
+    def foldTo[T](implicit b: Writer[T]): T =
+      b.yobject(value.map { case (k, v) => (k, v.foldTo[T]) })
   }
-  final class Mapping private[YAML] (
-      private val value: mutable.Map[String, YAML]
-  ) extends AnyVal
-      with YAML {
-    private[libyaml] def add(key: String, elem: YAML): Mapping = {
-      value.addOne((key, elem))
-      this
-    }
-
-    def items: Map[String, YAML] = value.toMap
-
-    override def toString(): String = value.toString()
+  case object YNull extends YAML {
+    def foldTo[T](implicit b: Writer[T]): T = b.ynull
   }
-  final class Sequence private[YAML] (
-      private val value: mutable.ListBuffer[YAML]
-  ) extends AnyVal
-      with YAML {
-    private[libyaml] def add(elem: YAML): Sequence = {
-      value.append(elem)
-      this
-    }
-    private[libyaml] def addAll(elems: IterableOnce[YAML]): Sequence = {
-      value.appendAll(elems)
-      this
-    }
-
-    def items: List[YAML] = value.toList
-
-    override def toString(): String = value.toString()
-  }
-
-  def apply(value: String): Scalar = new Scalar(value)
-  def sequence(values: YAML*): Sequence = new Sequence(
-    mutable.ListBuffer.from(values)
-  )
-  def sequence(values: IterableOnce[YAML]): Sequence = new Sequence(
-    mutable.ListBuffer.from(values)
-  )
-  def mapping(values: (String, YAML)*): Mapping = new Mapping(
-    mutable.Map.from(values)
-  )
-  def mapping(values: IterableOnce[(String, YAML)]): Mapping = new Mapping(
-    mutable.Map.from(values)
-  )
 
   given Writer[YAML] = new {
 
-    override def yint(i: Int): YAML = apply(i.toString())
+    override def ystring(s: String): YAML = YString(s)
 
-    override def ydouble(d: Double): YAML = apply(d.toString())
+    override def ydouble(d: Double): YAML = YDouble(d)
 
-    override def ylong(l: Long): YAML = apply(l.toString())
+    override def yobject(vs: Iterable[(String, YAML)]): YAML = YObj(vs)
 
-    def ynull: YAML = Null
-    def yfalse: YAML = apply("false")
-    def ytrue: YAML = apply("true")
-    def ynum(s: CharSequence, decIndex: Int, expIndex: Int): YAML = apply(
-      s.toString()
-    )
-    def ystring(s: CharSequence): YAML = apply(s.toString())
-    def yarray(vs: Iterable[YAML]): YAML = sequence(vs)
-    def yobject(vs: Iterable[(String, YAML)]): YAML = mapping(vs)
+    override def ynull: YAML = YNull
+
+    override def ynum(s: String, decIndex: Int, expIndex: Int): YAML = YString(
+      s
+    ) // TODO
+
+    override def yarray(vs: Iterable[YAML]): YAML = YArr(vs)
+
+    override def yint(i: Int): YAML = YInt(i)
+
+    override def ybool(b: Boolean): YAML = YBool(b)
+
+    override def ylong(l: Long): YAML = YLong(l)
+
+    override def yfalse: YAML = YBool(false)
+
+    override def ytrue: YAML = YBool(true)
+
+  }
+
+  implicit val readerInstance: Reader[YAML] = new Reader[YAML] {
+
+    override def string(t: YAML): Either[String, String] = t match {
+      case YString(v) => Right(v)
+      case _          => Left("Not a string!")
+    }
+
+    override def int(t: YAML): Either[String, Int] = t match {
+      case YInt(i)                    => Right(i)
+      case YLong(l) if l.isValidInt   => Right(l.toInt)
+      case YDouble(l) if l.isValidInt => Right(l.toInt)
+      case _                          => Left("Not a valid integer!")
+    }
+
+    override def long(t: YAML): Either[String, Long] = t match {
+      case YLong(l)                => Right(l)
+      case YInt(i)                 => Right(i.toLong)
+      case YDouble(l) if l.isWhole => Right(l.toLong)
+      case _                       => Left("Not a valid long!")
+    }
+
+    override def double(t: YAML): Either[String, Double] = t match {
+      case YDouble(l) => Right(l)
+      case YLong(l)   => Right(l.toDouble)
+      case YInt(i)    => Right(i.toDouble)
+      case _          => Left("Not a valid double!")
+    }
+
+    override def bool(t: YAML): Either[String, Boolean] = t match {
+      case YBool(b) => Right(b)
+      case _        => Left("Not a boolean value!")
+    }
+
+    override def array(t: YAML): Either[String, Iterable[YAML]] = t match {
+      case YArr(vs) => Right(vs)
+      case _        => Left("Not an array!")
+    }
+
+    override def obj(t: YAML): Either[String, Iterable[(String, YAML)]] =
+      t match {
+        case YObj(fs) => Right(fs)
+        case _        => Left("Not an object!")
+      }
   }
 }

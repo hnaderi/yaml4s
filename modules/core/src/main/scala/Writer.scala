@@ -20,11 +20,12 @@ trait Writer[T] {
   def ynull: T
   def yfalse: T
   def ytrue: T
-  def ynum(s: CharSequence, decIndex: Int, expIndex: Int): T
+  def ybool(b: Boolean): T
+  def ynum(s: String, decIndex: Int, expIndex: Int): T
   def ydouble(d: Double): T
   def ylong(l: Long): T
   def yint(i: Int): T
-  def ystring(s: CharSequence): T
+  def ystring(s: String): T
   def yarray(vs: Iterable[T]): T
   def yobject(vs: Iterable[(String, T)]): T
 }
