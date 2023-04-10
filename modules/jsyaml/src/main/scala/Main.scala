@@ -16,15 +16,28 @@
 
 package dev.hnaderi.libyaml
 
-trait Writer[T] {
-  def ynull: T
-  def yfalse: T
-  def ytrue: T
-  def ynum(s: CharSequence, decIndex: Int, expIndex: Int): T
-  def ydouble(d: Double): T
-  def ylong(l: Long): T
-  def yint(i: Int): T
-  def ystring(s: CharSequence): T
-  def yarray(vs: Iterable[T]): T
-  def yobject(vs: Iterable[(String, T)]): T
+object Main {
+  def main(args: Array[String]) = {
+    val input = """
+data:
+  double-quoted: "data"
+  single-quoted: 'data'
+  not quoted: data
+  folded: |
+    line 1
+    line 2
+  quoted: >
+    data 1
+    data 2
+    data 3
+  boolean 1: true
+  boolean 2: Yes
+  boolean 3: false
+  boolean 4: NO
+  not boolean 1: "Yes"
+  not boolean 2: "true"
+"""
+    val obj = JSYaml.load[YAML](input)
+    println(obj)
+  }
 }

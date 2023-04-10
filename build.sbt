@@ -20,6 +20,8 @@ ThisBuild / scalaVersion := Scala3
 lazy val root = tlCrossRootProject.aggregate(
   core,
   libyaml,
+  jsyaml,
+  snakeyaml,
   docs
 )
 
@@ -37,6 +39,26 @@ lazy val libyaml = crossProject(NativePlatform)
   .settings(
     name := "yaml4s-libyaml",
     nativeConfig ~= { _.withLinkingOptions(Seq("-lyaml")) }
+  )
+
+lazy val jsyaml = crossProject(JSPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("modules/jsyaml"))
+  .dependsOn(core)
+  .settings(
+    name := "yaml4s-js-yaml",
+    Compile / npmDependencies ++= Seq("js-yaml" -> "4.1.0"),
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
+  )
+  .enablePlugins(ScalaJSBundlerPlugin)
+
+lazy val snakeyaml = crossProject(JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("modules/snake"))
+  .dependsOn(core)
+  .settings(
+    name := "yaml4s-snakeyaml"
   )
 
 lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)

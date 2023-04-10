@@ -72,6 +72,13 @@ object YAML {
   )
 
   given Writer[YAML] = new {
+
+    override def yint(i: Int): YAML = apply(i.toString())
+
+    override def ydouble(d: Double): YAML = apply(d.toString())
+
+    override def ylong(l: Long): YAML = apply(l.toString())
+
     def ynull: YAML = Null
     def yfalse: YAML = apply("false")
     def ytrue: YAML = apply("true")
@@ -79,7 +86,7 @@ object YAML {
       s.toString()
     )
     def ystring(s: CharSequence): YAML = apply(s.toString())
-    def yarray(vs: List[YAML]): YAML = sequence(vs)
-    def yobject(vs: Map[String, YAML]): YAML = mapping(vs)
+    def yarray(vs: Iterable[YAML]): YAML = sequence(vs)
+    def yobject(vs: Iterable[(String, YAML)]): YAML = mapping(vs)
   }
 }
