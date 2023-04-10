@@ -18,24 +18,6 @@ package dev.hnaderi.libyaml
 
 import scala.collection.mutable
 
-trait YamlNodeVisitor {
-  def scalar(): YamlScalarVisitor
-  def seq(): YamlSequenceVisitor
-  def mapping(): YamlMappingVisitor
-}
-
-trait YamlScalarVisitor {
-  def write(value: String): Unit
-}
-trait YamlSequenceVisitor {
-  def next(): YamlNodeVisitor
-  def end(): Unit
-}
-trait YamlMappingVisitor {
-  def at(key: String): YamlNodeVisitor
-  def end(): Unit
-}
-
 sealed trait YAML extends Any
 object YAML {
   case object Null extends YAML

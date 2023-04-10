@@ -18,6 +18,7 @@
           name = "scala-libyaml-shell";
           typelevelShell = {
             jdk.package = pkgs.jdk8;
+            nodejs.enable = true;
             native = {
               enable = true;
               libraries = [ pkgs.libyaml ];

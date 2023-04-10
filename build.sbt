@@ -17,14 +17,26 @@ val Scala3 = "3.2.2"
 
 ThisBuild / scalaVersion := Scala3
 
-lazy val root = project.in(file(".")).aggregate(core, docs)
+lazy val root = tlCrossRootProject.aggregate(
+  core,
+  libyaml,
+  docs
+)
 
-lazy val core = project
-  .in(file("core"))
+lazy val core = crossProject(NativePlatform, JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("modules/core"))
   .settings(
-    name := "scala-libyaml",
+    name := "yaml4s"
+  )
+
+lazy val libyaml = crossProject(NativePlatform)
+  .crossType(CrossType.Pure)
+  .in(file("modules/libyaml"))
+  .dependsOn(core)
+  .settings(
+    name := "yaml4s-libyaml",
     nativeConfig ~= { _.withLinkingOptions(Seq("-lyaml")) }
   )
-  .enablePlugins(ScalaNativePlugin)
 
 lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)
