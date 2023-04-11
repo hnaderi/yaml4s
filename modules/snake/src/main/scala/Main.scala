@@ -24,7 +24,7 @@ object Main {
         .getLines()
         .mkString("\n")
 
-    val node = SnakeParser.parse[YAML](input)
+    val node = SnakeParser.parseDocuments[YAML](input)
     println(node)
   }
 }

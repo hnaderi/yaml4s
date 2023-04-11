@@ -35,7 +35,13 @@ object SnakeParser extends Parser {
 
   override def parseDocuments[T: Writer](
       yaml: String
-  ): Either[Throwable, Iterable[T]] = ???
+  ): Either[Throwable, Iterable[T]] =
+    import collection.mutable.ListBuffer
+    parseStream(new StringReader(yaml)).flatMap(nodes =>
+      nodes.foldLeft[Either[Throwable, ListBuffer[T]]](
+        Right(ListBuffer.empty[T])
+      )((l, n) => l.flatMap(list => yamlToJson(n).map(list.addOne)))
+    )
 
   private def catchNonFatal[A](f: => A): Either[Throwable, A] =
     try {
