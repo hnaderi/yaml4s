@@ -58,7 +58,8 @@ lazy val snakeyaml = crossProject(JVMPlatform)
   .in(file("modules/snake"))
   .dependsOn(core)
   .settings(
-    name := "yaml4s-snakeyaml"
+    name := "yaml4s-snakeyaml",
+    libraryDependencies += "org.snakeyaml" % "snakeyaml-engine" % "2.6"
   )
 
 lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)

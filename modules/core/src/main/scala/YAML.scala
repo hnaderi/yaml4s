@@ -35,18 +35,22 @@ object YAML {
   final case class YBool(value: Boolean) extends AnyVal with YAML {
     def foldTo[T](implicit b: Writer[T]): T = b.ybool(value)
   }
-  final case class YArr(value: Iterable[YAML]) extends AnyVal with YAML {
+  final case class YArr(value: Seq[YAML]) extends AnyVal with YAML {
     def foldTo[T](implicit b: Writer[T]): T = b.yarray(value.map(_.foldTo[T]))
   }
-  final case class YObj(value: Iterable[(String, YAML)])
-      extends AnyVal
-      with YAML {
+  final case class YObj(value: Seq[(String, YAML)]) extends AnyVal with YAML {
     def foldTo[T](implicit b: Writer[T]): T =
       b.yobject(value.map { case (k, v) => (k, v.foldTo[T]) })
+    def add(k: String, v: YAML): YObj = YObj((k, v) +: value)
+  }
+  object YObj {
+    val empty = YObj(Nil)
   }
   case object YNull extends YAML {
     def foldTo[T](implicit b: Writer[T]): T = b.ynull
   }
+  val False = YBool(false)
+  val True = YBool(true)
 
   given Writer[YAML] = new {
 
@@ -54,7 +58,7 @@ object YAML {
 
     override def ydouble(d: Double): YAML = YDouble(d)
 
-    override def yobject(vs: Iterable[(String, YAML)]): YAML = YObj(vs)
+    override def yobject(vs: Iterable[(String, YAML)]): YAML = YObj(vs.toSeq)
 
     override def ynull: YAML = YNull
 
@@ -62,7 +66,7 @@ object YAML {
       s
     ) // TODO
 
-    override def yarray(vs: Iterable[YAML]): YAML = YArr(vs)
+    override def yarray(vs: Iterable[YAML]): YAML = YArr(vs.toSeq)
 
     override def yint(i: Int): YAML = YInt(i)
 
