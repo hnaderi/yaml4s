@@ -21,7 +21,10 @@ import scala.collection.mutable
 import scala.scalanative.unsafe.*
 import scala.scalanative.unsigned.*
 
-import all.*
+import extern_functions._
+import aliases._
+import enumerations._
+import structs._
 
 object LibyamlParser extends Parser {
 

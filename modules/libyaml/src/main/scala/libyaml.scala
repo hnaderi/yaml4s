@@ -21,15 +21,16 @@ import _root_.scala.scalanative.unsigned.*
 import _root_.scala.scalanative.libc.*
 import _root_.scala.scalanative.*
 
-object predef:
-  private[libyaml] trait CEnumU[T](using eq: T =:= UInt):
+private object predef {
+  private[libyaml] trait CEnumU[T](implicit eq: T =:= UInt):
     given Tag[T] = Tag.UInt.asInstanceOf[Tag[T]]
     extension (inline t: T)
       inline def int: CInt = eq.apply(t).toInt
       inline def uint: CUnsignedInt = eq.apply(t)
       inline def value: CUnsignedInt = eq.apply(t)
+}
 
-object enumerations:
+private[libyaml] object enumerations {
   import predef.*
 
   /** Line break types.
@@ -467,8 +468,9 @@ object enumerations:
       inline def &(b: yaml_token_type_e): yaml_token_type_e = a & b
       inline def |(b: yaml_token_type_e): yaml_token_type_e = a | b
       inline def is(b: yaml_token_type_e): Boolean = (a & b) == b
+}
 
-object aliases:
+private[libyaml] object aliases {
   import _root_.dev.hnaderi.libyaml.enumerations.*
   import _root_.dev.hnaderi.libyaml.aliases.*
   import _root_.dev.hnaderi.libyaml.structs.*
@@ -653,8 +655,9 @@ object aliases:
     extension (v: yaml_write_handler_t)
       inline def value: CFuncPtr3[Ptr[Byte], Ptr[CUnsignedChar], size_t, CInt] =
         v
+}
 
-object structs:
+private[libyaml] object structs {
   import _root_.dev.hnaderi.libyaml.enumerations.*
   import _root_.dev.hnaderi.libyaml.aliases.*
   import _root_.dev.hnaderi.libyaml.structs.*
@@ -5282,9 +5285,10 @@ object structs:
       def major_=(value: CInt): Unit = !struct.at1 = value
       def minor: CInt = struct._2
       def minor_=(value: CInt): Unit = !struct.at2 = value
+}
 
 @extern
-private[libyaml] object extern_functions:
+private[libyaml] object extern_functions {
   import _root_.dev.hnaderi.libyaml.enumerations.*
   import _root_.dev.hnaderi.libyaml.aliases.*
   import _root_.dev.hnaderi.libyaml.structs.*
@@ -5710,120 +5714,4 @@ private[libyaml] object extern_functions:
     * [bindgen] header: /usr/include/yaml.h
     */
   def yaml_token_delete(token: Ptr[yaml_token_t]): Unit = extern
-
-object functions:
-  import _root_.dev.hnaderi.libyaml.enumerations.*
-  import _root_.dev.hnaderi.libyaml.aliases.*
-  import _root_.dev.hnaderi.libyaml.structs.*
-
-  import extern_functions.*
-  export extern_functions.*
-
-object types:
-  export _root_.dev.hnaderi.libyaml.structs.*
-  export _root_.dev.hnaderi.libyaml.aliases.*
-  export _root_.dev.hnaderi.libyaml.enumerations.*
-
-object all:
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_break_e
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_emitter_state_e
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_encoding_e
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_error_type_e
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_event_type_e
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_mapping_style_e
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_node_type_e
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_parser_state_e
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_scalar_style_e
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_sequence_style_e
-  export _root_.dev.hnaderi.libyaml.enumerations.yaml_token_type_e
-  export _root_.dev.hnaderi.libyaml.aliases.FILE
-  export _root_.dev.hnaderi.libyaml.aliases.size_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_break_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_char_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_emitter_state_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_encoding_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_error_type_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_event_type_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_mapping_style_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_node_item_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_node_type_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_parser_state_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_read_handler_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_scalar_style_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_sequence_style_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_token_type_t
-  export _root_.dev.hnaderi.libyaml.aliases.yaml_write_handler_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_alias_data_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_alias_data_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_anchors_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_anchors_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_document_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_document_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_emitter_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_emitter_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_event_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_event_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_mark_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_mark_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_node_pair_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_node_pair_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_node_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_node_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_parser_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_parser_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_simple_key_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_simple_key_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_tag_directive_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_tag_directive_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_token_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_token_t
-  export _root_.dev.hnaderi.libyaml.structs.yaml_version_directive_s
-  export _root_.dev.hnaderi.libyaml.structs.yaml_version_directive_t
-  export _root_.dev.hnaderi.libyaml.functions.yaml_alias_event_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_add_mapping
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_add_scalar
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_add_sequence
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_append_mapping_pair
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_append_sequence_item
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_delete
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_end_event_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_get_node
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_get_root_node
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_document_start_event_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_close
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_delete
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_dump
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_emit
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_flush
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_open
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_set_break
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_set_canonical
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_set_encoding
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_set_indent
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_set_output
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_set_output_file
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_set_output_string
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_set_unicode
-  export _root_.dev.hnaderi.libyaml.functions.yaml_emitter_set_width
-  export _root_.dev.hnaderi.libyaml.functions.yaml_event_delete
-  export _root_.dev.hnaderi.libyaml.functions.yaml_get_version
-  export _root_.dev.hnaderi.libyaml.functions.yaml_get_version_string
-  export _root_.dev.hnaderi.libyaml.functions.yaml_mapping_end_event_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_mapping_start_event_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_parser_delete
-  export _root_.dev.hnaderi.libyaml.functions.yaml_parser_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_parser_load
-  export _root_.dev.hnaderi.libyaml.functions.yaml_parser_parse
-  export _root_.dev.hnaderi.libyaml.functions.yaml_parser_scan
-  export _root_.dev.hnaderi.libyaml.functions.yaml_parser_set_encoding
-  export _root_.dev.hnaderi.libyaml.functions.yaml_parser_set_input
-  export _root_.dev.hnaderi.libyaml.functions.yaml_parser_set_input_file
-  export _root_.dev.hnaderi.libyaml.functions.yaml_parser_set_input_string
-  export _root_.dev.hnaderi.libyaml.functions.yaml_scalar_event_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_sequence_end_event_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_sequence_start_event_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_stream_end_event_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_stream_start_event_initialize
-  export _root_.dev.hnaderi.libyaml.functions.yaml_token_delete
+}

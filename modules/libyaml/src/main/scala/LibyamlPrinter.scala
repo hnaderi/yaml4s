@@ -24,7 +24,10 @@ import scala.scalanative.runtime
 import scala.scalanative.unsafe.*
 import scala.scalanative.unsigned.*
 
-import all.*
+import extern_functions._
+import aliases._
+import enumerations._
+import structs._
 
 object LibyamlPrinter extends Printer {
 

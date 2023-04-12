@@ -21,7 +21,10 @@ import scala.scalanative.runtime.libc
 import scala.scalanative.unsafe.*
 import scala.scalanative.unsigned.*
 
-import all.*
+import extern_functions._
+import aliases._
+import enumerations._
+import structs._
 
 final class LibYamlDocument(private val document: Ptr[yaml_document_t])
     extends AnyVal {
