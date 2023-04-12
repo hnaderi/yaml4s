@@ -26,5 +26,8 @@ object Main {
 
     val yaml = LibyamlParser.parseDocuments[YAML](input)
     println(yaml)
+
+    yaml.toSeq.flatten.map(LibyamlPrinter.print).foreach(println)
+
   }
 }

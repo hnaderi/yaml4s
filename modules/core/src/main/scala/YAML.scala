@@ -20,19 +20,20 @@ sealed trait YAML extends Any {
   def foldTo[T: Writer]: T
 }
 object YAML {
-  final case class YString(value: String) extends AnyVal with YAML {
+  sealed trait Scalar extends Any with YAML
+  final case class YString(value: String) extends AnyVal with Scalar {
     def foldTo[T](implicit b: Writer[T]): T = b.ystring(value)
   }
-  final case class YInt(value: Int) extends AnyVal with YAML {
+  final case class YInt(value: Int) extends AnyVal with Scalar {
     def foldTo[T](implicit b: Writer[T]): T = b.yint(value)
   }
-  final case class YLong(value: Long) extends AnyVal with YAML {
+  final case class YLong(value: Long) extends AnyVal with Scalar {
     def foldTo[T](implicit b: Writer[T]): T = b.ylong(value)
   }
-  final case class YDouble(value: Double) extends AnyVal with YAML {
+  final case class YDouble(value: Double) extends AnyVal with Scalar {
     def foldTo[T](implicit b: Writer[T]): T = b.ydouble(value)
   }
-  final case class YBool(value: Boolean) extends AnyVal with YAML {
+  final case class YBool(value: Boolean) extends AnyVal with Scalar {
     def foldTo[T](implicit b: Writer[T]): T = b.ybool(value)
   }
   final case class YArr(value: Seq[YAML]) extends AnyVal with YAML {
@@ -46,7 +47,7 @@ object YAML {
   object YObj {
     val empty = YObj(Nil)
   }
-  case object YNull extends YAML {
+  case object YNull extends Scalar {
     def foldTo[T](implicit b: Writer[T]): T = b.ynull
   }
   val False = YBool(false)

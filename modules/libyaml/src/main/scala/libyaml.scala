@@ -5499,7 +5499,7 @@ private[libyaml] object extern_functions:
     */
   def yaml_emitter_set_output(
       emitter: Ptr[yaml_emitter_t],
-      handler: Ptr[yaml_write_handler_t],
+      handler: yaml_write_handler_t, // TODO check
       data: Ptr[Byte]
   ): Unit = extern
 
