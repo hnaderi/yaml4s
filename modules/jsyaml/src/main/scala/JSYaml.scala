@@ -16,7 +16,7 @@
 
 package dev.hnaderi.libyaml
 
-import dev.hnaderi.libyaml.YAML.*
+import dev.hnaderi.libyaml.YAML._
 
 import scala.util.Try
 
@@ -29,12 +29,12 @@ object JSYaml extends Parser with Printer {
   override def print(t: YAML): String = JS.dump(convertYAMLToJSUnsafe(t))
 
   override def parse[T: Writer](input: String): Either[Throwable, T] =
-    Try(JS.load(input)).toEither.map(convertAnyToJsonUnsafe)
+    Try(JS.load(input)).toEither.map(convertAnyToJsonUnsafe[T](_))
 
   override def parseDocuments[T: Writer](
       yaml: String
   ): Either[Throwable, Iterable[T]] =
-    Try(JS.loadAll(yaml)).toEither.map(_.map(convertAnyToJsonUnsafe))
+    Try(JS.loadAll(yaml)).toEither.map(_.map(convertAnyToJsonUnsafe[T](_)))
 
   private[this] def convertAnyToJsonUnsafe[T](
       input: Any
@@ -45,13 +45,11 @@ object JSYaml extends Parser with Printer {
     case false     => w.yfalse
     case null      => w.ynull
     case a: js.Array[?] =>
-      w.yarray(a.map(convertAnyToJsonUnsafe(_: Any)).toList)
+      w.yarray(a.map(convertAnyToJsonUnsafe[T](_)).toList)
     case o: js.Object =>
       w.yobject(
         o.asInstanceOf[js.Dictionary[Any]]
-          .view
-          .mapValues(convertAnyToJsonUnsafe)
-          .toMap
+          .map { case (k, v) => (k, convertAnyToJsonUnsafe[T](v)) }
       )
     case other if js.isUndefined(other) => w.ynull
   }
@@ -65,7 +63,10 @@ object JSYaml extends Parser with Printer {
       case YBool(value)   => value
       case YArr(value)    => value.map(convertYAMLToJSUnsafe).toJSArray
       case YObj(value) =>
-        value.map((k, v) => (k, convertYAMLToJSUnsafe(v))).toMap.toJSDictionary
+        value
+          .map { case (k, v) => (k, convertYAMLToJSUnsafe(v)) }
+          .toMap
+          .toJSDictionary
       case YNull => null
     }
 

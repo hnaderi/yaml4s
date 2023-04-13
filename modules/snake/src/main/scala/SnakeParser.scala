@@ -22,16 +22,16 @@ import org.snakeyaml.engine.v2.constructor.StandardConstructor
 import org.snakeyaml.engine.v2.nodes._
 import org.snakeyaml.engine.v2.scanner.StreamReader
 
-import java.io.Reader
 import java.io.StringReader
+import java.io.{Reader => JReader}
 import java.util.Optional
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConverters._
 
 object SnakeParser extends Parser {
   private val settings = LoadSettings.builder.build
 
   override def parse[T: Writer](input: String): Either[Throwable, T] =
-    parseNode(input).flatMap(yamlToJson)
+    parseNode(input).flatMap(yamlToJson[T](_))
 
   override def parseDocuments[T: Writer](
       yaml: String
@@ -40,7 +40,13 @@ object SnakeParser extends Parser {
     parseStream(new StringReader(yaml)).flatMap(nodes =>
       nodes.foldLeft[Either[Throwable, ListBuffer[T]]](
         Right(ListBuffer.empty[T])
-      )((l, n) => l.flatMap(list => yamlToJson(n).map(list.addOne)))
+      ) { case (l, n) =>
+        for {
+          list <- l
+          y <- yamlToJson(n)
+          _ = list.append(y)
+        } yield list
+      }
     )
   }
 
@@ -68,7 +74,7 @@ object SnakeParser extends Parser {
   private[this] def asScala[T](ot: Optional[T]): Option[T] =
     if (ot.isPresent) Some(ot.get()) else None
 
-  private[this] def createComposer(reader: Reader) =
+  private[this] def createComposer(reader: JReader) =
     new Composer(
       settings,
       new org.snakeyaml.engine.v2.parser.ParserImpl(
@@ -77,7 +83,7 @@ object SnakeParser extends Parser {
       )
     )
 
-  private[this] def parseSingle(reader: Reader): Either[ParsingFailure, Node] =
+  private[this] def parseSingle(reader: JReader): Either[ParsingFailure, Node] =
     catchNonFatal {
       val composer = createComposer(reader)
       asScala(composer.getSingleNode)
@@ -94,9 +100,9 @@ object SnakeParser extends Parser {
     }
 
   private[this] def parseStream(
-      reader: Reader
-  ): Either[ParsingFailure, LazyList[Node]] =
-    catchNonFatal(LazyList.from(createComposer(reader).asScala)).leftMap(err =>
+      reader: JReader
+  ): Either[ParsingFailure, Stream[Node]] =
+    catchNonFatal(createComposer(reader).asScala.toStream).leftMap(err =>
       ParsingFailure(err.getMessage, err)
     )
 
@@ -140,17 +146,10 @@ object SnakeParser extends Parser {
               )
           }
         case Tag.INT | Tag.FLOAT =>
-          node
-            .getValue()
-            .toIntOption
-            .map(w.yint)
-            .orElse(node.getValue().toLongOption.map(w.ylong))
-            .orElse(node.getValue().toDoubleOption.map(w.ydouble))
-            .getOrElse {
-              throw new NumberFormatException(
-                s"Invalid numeric string ${node.getValue}"
-              )
-            }
+          val bd = BigDecimal(node.getValue())
+          if (bd.isValidInt) w.yint(bd.toIntExact)
+          else if (bd.isValidLong) w.ylong(bd.toLongExact)
+          else w.ydouble(bd.toDouble)
         case Tag.BOOL =>
           flattener.construct(node) match {
             case b: java.lang.Boolean => w.ybool(b)
@@ -211,14 +210,16 @@ object SnakeParser extends Parser {
     }
   }
 
+  private[this] implicit class CatsEitherOps[A, B](
+      private val eab: Either[A, B]
+  ) extends AnyVal {
+    def leftMap[C](f: A => C): Either[C, B] =
+      eab match {
+        case Left(a)      => Left(f(a))
+        case r @ Right(_) => r.asInstanceOf[Either[C, B]]
+      }
+  }
+
   final case class ParsingFailure(msg: String, err: Throwable)
       extends Exception("")
-}
-
-private implicit class EitherOps[A, B](eab: Either[A, B]) extends AnyVal {
-  def leftMap[C](f: A => C): Either[C, B] =
-    eab match {
-      case Left(a)      => Left(f(a))
-      case r @ Right(_) => r.asInstanceOf[Either[C, B]]
-    }
 }

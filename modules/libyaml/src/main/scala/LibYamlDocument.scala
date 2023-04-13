@@ -28,7 +28,7 @@ import binding.definitions._
 final class LibYamlDocument(private val document: Ptr[yaml_document_t])
     extends AnyVal {
 
-  def clean: Unit =
+  def clean(): Unit =
     yaml_document_delete(document)
 
   def visit[T](implicit w: Writer[T]): Option[T] = Zone { implicit zone =>
@@ -96,7 +96,7 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
     while (cur.toLong < items.top.toLong) {
       val idx = !cur
       val node = yaml_document_get_node(document, idx)
-      result.addOne(visitNode(document, node))
+      result.append(visitNode(document, node))
       cur = cur + 1
     }
 
@@ -120,7 +120,7 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
       val idx = cur.value
       val node = yaml_document_get_node(document, idx)
 
-      result.addOne((key, visitNode(document, node)))
+      result.+=((key, visitNode(document, node)))
       cur = cur + 1
     }
 

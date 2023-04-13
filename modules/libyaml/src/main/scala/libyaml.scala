@@ -1,6 +1,21 @@
+/*
+ * Copyright 2023 Hossein Naderi
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package dev.hnaderi.libyaml.binding
 
-import scala.scalanative._
 import scala.scalanative.unsigned._
 import scala.scalanative.unsafe._
 
@@ -1057,67 +1072,54 @@ object others {
   }
 
   object struct_yaml_version_directive_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_version_directive_s] =
       alloc[struct_yaml_version_directive_s]()
   }
   object struct_yaml_tag_directive_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_tag_directive_s] =
       alloc[struct_yaml_tag_directive_s]()
   }
   object struct_yaml_mark_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_mark_s] =
       alloc[struct_yaml_mark_s]()
   }
   object struct_yaml_token_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_token_s] =
       alloc[struct_yaml_token_s]()
   }
   object struct_yaml_event_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_event_s] =
       alloc[struct_yaml_event_s]()
   }
   object struct_yaml_node_pair_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_node_pair_s] =
       alloc[struct_yaml_node_pair_s]()
   }
   object struct_yaml_node_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_node_s] =
       alloc[struct_yaml_node_s]()
   }
   object struct_yaml_document_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_document_s] =
       alloc[struct_yaml_document_s]()
   }
   object struct_yaml_simple_key_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_simple_key_s] =
       alloc[struct_yaml_simple_key_s]()
   }
   object struct_yaml_alias_data_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_alias_data_s] =
       alloc[struct_yaml_alias_data_s]()
   }
   object struct_yaml_parser_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_parser_s] =
       alloc[struct_yaml_parser_s]()
   }
   object struct_yaml_anchors_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_anchors_s] =
       alloc[struct_yaml_anchors_s]()
   }
   object struct_yaml_emitter_s {
-    import implicits._
     def apply()(implicit z: Zone): Ptr[struct_yaml_emitter_s] =
       alloc[struct_yaml_emitter_s]()
   }

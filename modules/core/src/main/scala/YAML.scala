@@ -53,7 +53,7 @@ object YAML {
   val False = YBool(false)
   val True = YBool(true)
 
-  implicit val writerInstance: Writer[YAML] = new {
+  implicit val writerInstance: Writer[YAML] = new Writer[YAML] {
 
     override def ystring(s: String): YAML = YString(s)
 

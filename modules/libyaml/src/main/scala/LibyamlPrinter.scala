@@ -16,16 +16,13 @@
 
 package dev.hnaderi.libyaml
 
-import dev.hnaderi.libyaml.YAML.*
+import dev.hnaderi.libyaml.YAML._
 
-import scala.annotation.tailrec
-import scala.collection.mutable
 import scala.scalanative.runtime
-import scala.scalanative.unsafe.*
-import scala.scalanative.unsigned.*
+import scala.scalanative.unsafe._
+import scala.scalanative.unsigned._
 
 import binding.libyaml._
-import binding.others.implicits._
 import binding.others._
 import binding.definitions._
 
@@ -36,8 +33,8 @@ object LibyamlPrinter extends Printer {
 
     yaml_emitter_initialize(emitter)
 
-    val stringBuilder = java.lang.StringBuilder()
-    yaml_emitter_set_output(emitter, handler, toPtr(stringBuilder))
+    val stringBuilder = new java.lang.StringBuilder()
+    yaml_emitter_set_output(emitter, handler(_, _, _), toPtr(stringBuilder))
 
     val doc = struct_yaml_document_s()
     yaml_document_initialize(doc, null, null, null, 0, 0)

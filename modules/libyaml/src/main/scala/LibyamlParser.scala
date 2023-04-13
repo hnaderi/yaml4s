@@ -19,12 +19,9 @@ package dev.hnaderi.libyaml
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.scalanative.unsafe._
-import scala.scalanative.unsigned._
 
 import binding.libyaml._
-import binding.others.implicits._
 import binding.others._
-import binding.definitions._
 
 object LibyamlParser extends Parser {
 
@@ -43,11 +40,11 @@ object LibyamlParser extends Parser {
         _ <- handle(yaml_parser_load(parser, document), DocumentLoadFailed)
         _ = println("d")
 
-        doc = LibYamlDocument(document)
+        doc = new LibYamlDocument(document)
 
         result <- doc.visit[T].toRight(NoDocument)
       } yield {
-        doc.clean
+        doc.clean()
         yaml_parser_delete(parser)
         result
       }
@@ -67,20 +64,19 @@ object LibyamlParser extends Parser {
     handle(yaml_parser_initialize(parser), ParserInitFailed).flatMap { _ =>
       yaml_parser_set_input_string(parser, input_c, input.size)
       val document = struct_yaml_document_s()
-      val doc = LibYamlDocument(document)
+      val doc = new LibYamlDocument(document)
 
       @tailrec
       def go(): Either[Throwable, Iterable[T]] =
-        if (yaml_parser_load(parser, document) == 0)
-          then Left (DocumentLoadFailed)
+        if (yaml_parser_load(parser, document) == 0) Left(DocumentLoadFailed)
         else {
           val t = doc.visit[T]
-          doc.clean
+          doc.clean()
 
           t match {
             case None => Right(result)
             case Some(value) =>
-              result.addOne(value)
+              result.append(value)
               go()
           }
         }

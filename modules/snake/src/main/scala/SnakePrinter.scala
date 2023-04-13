@@ -16,6 +16,7 @@
 
 package dev.hnaderi.libyaml
 
+import dev.hnaderi.libyaml.YAML._
 import org.snakeyaml.engine.v2.api.DumpSettings
 import org.snakeyaml.engine.v2.api.StreamDataWriter
 import org.snakeyaml.engine.v2.common
@@ -24,9 +25,7 @@ import org.snakeyaml.engine.v2.nodes._
 import org.snakeyaml.engine.v2.serializer.Serializer
 
 import java.io.StringWriter
-import scala.jdk.CollectionConverters._
-import dev.hnaderi.libyaml.YAML._
-import SnakePrinter._
+import scala.collection.JavaConverters._
 
 object SnakePrinter extends Printer {
 
