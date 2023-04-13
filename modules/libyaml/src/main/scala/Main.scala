@@ -24,10 +24,18 @@ object Main {
         .getLines()
         .mkString("\n")
 
-    val yaml = LibyamlParser.parseDocuments[YAML](input)
+    // val yaml = Right(
+    //   YAML.YObj(
+    //     Seq(
+    //       "a" -> YAML.False,
+    //       "b" -> YAML.YArr(Seq(YAML.YInt(1), YAML.YDouble(20.34)))
+    //     )
+    //   )
+    // )
+    val yaml = LibyamlParser.parse[YAML](input)
     println(yaml)
 
-    yaml.toSeq.flatten.map(LibyamlPrinter.print).foreach(println)
+    yaml.map(LibyamlPrinter.print).foreach(println)
 
   }
 }

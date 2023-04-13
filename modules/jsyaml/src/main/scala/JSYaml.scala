@@ -38,7 +38,7 @@ object JSYaml extends Parser with Printer {
 
   private[this] def convertAnyToJsonUnsafe[T](
       input: Any
-  )(using w: Writer[T]): T = input match {
+  )(implicit w: Writer[T]): T = input match {
     case s: String => w.ystring(s)
     case n: Double => w.ydouble(n)
     case true      => w.ytrue

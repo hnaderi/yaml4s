@@ -24,22 +24,22 @@ import scala.scalanative.runtime
 import scala.scalanative.unsafe.*
 import scala.scalanative.unsigned.*
 
-import extern_functions._
-import aliases._
-import enumerations._
-import structs._
+import binding.libyaml._
+import binding.others.implicits._
+import binding.others._
+import binding.definitions._
 
 object LibyamlPrinter extends Printer {
 
   override def print(t: YAML): String = Zone { implicit z =>
-    val emitter = yaml_emitter_t()
+    val emitter = struct_yaml_emitter_s()
 
     yaml_emitter_initialize(emitter)
 
     val stringBuilder = java.lang.StringBuilder()
     yaml_emitter_set_output(emitter, handler, toPtr(stringBuilder))
 
-    val doc = yaml_document_t()
+    val doc = struct_yaml_document_s()
     yaml_document_initialize(doc, null, null, null, 0, 0)
     build(doc, t)
 
@@ -63,13 +63,13 @@ object LibyamlPrinter extends Printer {
   private def handler(
       userdata: Ptr[Byte],
       buf: Ptr[CUnsignedChar],
-      size: size_t
+      size: CInt
   ): CInt = {
     val builder = fromPtr[java.lang.StringBuilder](userdata)
 
     val bytes = new Array[Byte](size.toInt)
     val value = buf.asInstanceOf[CString]
-    runtime.libc.memcpy(bytes.at(0), value, size)
+    runtime.libc.memcpy(bytes.at(0), value, size.toULong)
 
     builder.append(new String(bytes))
 
@@ -87,7 +87,7 @@ object LibyamlPrinter extends Printer {
         val sequence = yaml_document_add_sequence(
           document,
           null,
-          yaml_sequence_style_e.YAML_ANY_SEQUENCE_STYLE
+          enum_yaml_sequence_style_e.YAML_ANY_SEQUENCE_STYLE
         )
         value.foreach { y =>
           val item = build(document, y)
@@ -98,7 +98,7 @@ object LibyamlPrinter extends Printer {
         val mapping = yaml_document_add_mapping(
           document,
           null,
-          yaml_mapping_style_e.YAML_ANY_MAPPING_STYLE
+          enum_yaml_mapping_style_e.YAML_ANY_MAPPING_STYLE
         )
         value.foreach { case (k, v) =>
           val keyId: NodeId = yaml_document_add_scalar(
@@ -106,7 +106,7 @@ object LibyamlPrinter extends Printer {
             null,
             asYamlChar(k),
             k.length(),
-            yaml_scalar_style_e.YAML_PLAIN_SCALAR_STYLE
+            enum_yaml_scalar_style_e.YAML_PLAIN_SCALAR_STYLE
           )
 
           val valueId = build(document, v)
@@ -115,6 +115,8 @@ object LibyamlPrinter extends Printer {
         }
         mapping
     }
+
+  import enum_yaml_scalar_style_e._
 
   private def buildScalar(
       document: Ptr[yaml_document_t],
@@ -138,7 +140,7 @@ object LibyamlPrinter extends Printer {
           null,
           v,
           str.length(),
-          yaml_scalar_style_e.YAML_PLAIN_SCALAR_STYLE
+          YAML_PLAIN_SCALAR_STYLE
         )
       case YLong(value) =>
         val str = value.toString()
@@ -148,7 +150,7 @@ object LibyamlPrinter extends Printer {
           null,
           v,
           str.length(),
-          yaml_scalar_style_e.YAML_PLAIN_SCALAR_STYLE
+          YAML_PLAIN_SCALAR_STYLE
         )
       case YDouble(value) =>
         val str = value.toString()
@@ -158,7 +160,7 @@ object LibyamlPrinter extends Printer {
           null,
           v,
           str.length(),
-          yaml_scalar_style_e.YAML_PLAIN_SCALAR_STYLE
+          YAML_PLAIN_SCALAR_STYLE
         )
       case YBool(value) =>
         val str = value.toString()
@@ -168,7 +170,7 @@ object LibyamlPrinter extends Printer {
           null,
           v,
           str.length(),
-          yaml_scalar_style_e.YAML_PLAIN_SCALAR_STYLE
+          YAML_PLAIN_SCALAR_STYLE
         )
       case YNull =>
         yaml_document_add_scalar(
@@ -176,7 +178,7 @@ object LibyamlPrinter extends Printer {
           null,
           null,
           0,
-          yaml_scalar_style_e.YAML_PLAIN_SCALAR_STYLE
+          YAML_PLAIN_SCALAR_STYLE
         )
     }
 
@@ -188,7 +190,7 @@ object LibyamlPrinter extends Printer {
   private def hasNewline(s: String): Boolean = s.indexOf('\n') >= 0
 
   private def stringStyle(value: String) =
-    if (isBad(value)) yaml_scalar_style_e.YAML_DOUBLE_QUOTED_SCALAR_STYLE
-    else if (hasNewline(value)) yaml_scalar_style_e.YAML_LITERAL_SCALAR_STYLE
-    else yaml_scalar_style_e.YAML_PLAIN_SCALAR_STYLE
+    if (isBad(value)) YAML_DOUBLE_QUOTED_SCALAR_STYLE
+    else if (hasNewline(value)) YAML_LITERAL_SCALAR_STYLE
+    else YAML_PLAIN_SCALAR_STYLE
 }

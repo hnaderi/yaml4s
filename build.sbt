@@ -40,8 +40,7 @@ lazy val libyaml = crossProject(NativePlatform)
   .in(file("modules/libyaml"))
   .dependsOn(core)
   .settings(
-    name := "yaml4s-libyaml",
-    nativeConfig ~= { _.withLinkingOptions(Seq("-lyaml")) }
+    name := "yaml4s-libyaml"
   )
 
 lazy val jsyaml = crossProject(JSPlatform)

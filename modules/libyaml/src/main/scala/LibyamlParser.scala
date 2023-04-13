@@ -18,13 +18,13 @@ package dev.hnaderi.libyaml
 
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.scalanative.unsafe.*
-import scala.scalanative.unsigned.*
+import scala.scalanative.unsafe._
+import scala.scalanative.unsigned._
 
-import extern_functions._
-import aliases._
-import enumerations._
-import structs._
+import binding.libyaml._
+import binding.others.implicits._
+import binding.others._
+import binding.definitions._
 
 object LibyamlParser extends Parser {
 
@@ -32,15 +32,16 @@ object LibyamlParser extends Parser {
     implicit zone =>
       val input_c = toCString(input).asInstanceOf[Ptr[CUnsignedChar]]
 
-      val parser = yaml_parser_t()
+      val parser = struct_yaml_parser_s()
 
       for {
         _ <- handle(yaml_parser_initialize(parser), ParserInitFailed)
 
-        _ = yaml_parser_set_input_string(parser, input_c, input.size.toULong)
+        _ = yaml_parser_set_input_string(parser, input_c, input.size)
 
-        document = yaml_document_t()
+        document = struct_yaml_document_s()
         _ <- handle(yaml_parser_load(parser, document), DocumentLoadFailed)
+        _ = println("d")
 
         doc = LibYamlDocument(document)
 
@@ -60,19 +61,18 @@ object LibyamlParser extends Parser {
   ): Either[Throwable, Iterable[T]] = Zone { implicit zone =>
     val input_c = toCString(input).asInstanceOf[Ptr[CUnsignedChar]]
 
-    val parser = yaml_parser_t()
+    val parser = struct_yaml_parser_s()
     val result = mutable.ListBuffer.empty[T]
 
-    handle(yaml_parser_initialize(parser), ParserInitFailed).flatMap(_ =>
-
-      yaml_parser_set_input_string(parser, input_c, input.size.toULong)
-      val document = yaml_document_t()
+    handle(yaml_parser_initialize(parser), ParserInitFailed).flatMap { _ =>
+      yaml_parser_set_input_string(parser, input_c, input.size)
+      val document = struct_yaml_document_s()
       val doc = LibYamlDocument(document)
 
       @tailrec
       def go(): Either[Throwable, Iterable[T]] =
         if (yaml_parser_load(parser, document) == 0)
-        then Left(DocumentLoadFailed)
+          then Left (DocumentLoadFailed)
         else {
           val t = doc.visit[T]
           doc.clean
@@ -88,7 +88,7 @@ object LibyamlParser extends Parser {
       val out = go()
       yaml_parser_delete(parser)
       out
-    )
+    }
 
   }
 
