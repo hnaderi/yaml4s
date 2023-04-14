@@ -98,6 +98,7 @@ jobs:
           vcpkg install --triplet x64-windows libyaml
 
       - name: Check that workflows are up to date
+        if: '!startsWith(matrix.os, ''windows'')'
         shell: bash
         run: sbt githubWorkflowCheck
 
