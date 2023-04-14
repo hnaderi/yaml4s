@@ -1,26 +1,28 @@
 ThisBuild / githubWorkflowBuildMatrixFailFast := Some(
   false
 ) // This is a huge build matrix! so it's better to find problems rather than failing prematurely.
-ThisBuild / githubWorkflowOSes :=
-  Seq(
-    "ubuntu-latest",
-    "ubuntu-20.04",
-    "ubuntu-22.04",
-    "macos-11",
-    "macos-12",
-    "windows-2022"
-  )
+ThisBuild / githubWorkflowOSes := Seq("ubuntu-latest")
+
+ThisBuild / githubWorkflowBuildMatrixInclusions ++= Seq(
+  MatrixInclude(Map("project" -> "rootNative"), Map("os" -> "ubuntu-latest")),
+  MatrixInclude(Map("project" -> "rootNative"), Map("os" -> "ubuntu-20.04")),
+  MatrixInclude(Map("project" -> "rootNative"), Map("os" -> "windows-2022")),
+  MatrixInclude(Map("project" -> "rootNative"), Map("os" -> "macos-11")),
+  MatrixInclude(Map("project" -> "rootNative"), Map("os" -> "macos-12"))
+)
 
 ThisBuild / githubWorkflowJobSetup ++= Seq(
   WorkflowStep.Run(
     List("sudo apt-get update", "sudo apt-get install libyaml-dev"),
     name = Some("Install libyaml (ubuntu)"),
-    cond = Some("startsWith(matrix.os, 'ubuntu')")
+    cond =
+      Some("startsWith(matrix.os, 'ubuntu') && matrix.project == 'rootNative'")
   ),
   WorkflowStep.Run(
     List("brew install libyaml"),
     name = Some("Install libyaml (macos)"),
-    cond = Some("startsWith(matrix.os, 'macos')")
+    cond =
+      Some("startsWith(matrix.os, 'macos') && matrix.project == 'rootNative'")
   ),
   WorkflowStep.Run(
     List(
@@ -28,7 +30,8 @@ ThisBuild / githubWorkflowJobSetup ++= Seq(
       "vcpkg install --triplet x64-windows libyaml"
     ),
     name = Some("Install libyaml (windows)"),
-    cond = Some("startsWith(matrix.os, 'windows')")
+    cond =
+      Some("startsWith(matrix.os, 'windows') && matrix.project == 'rootNative'")
   )
 )
 
