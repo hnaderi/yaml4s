@@ -82,7 +82,7 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
         case "true" | "Yes" => w.ytrue
         case "false" | "NO" => w.yfalse
         // TODO numbers!
-        case other => w.ystring(str)
+        case other => w.ystring(other)
       }
   }
 

@@ -25,7 +25,7 @@ import org.snakeyaml.engine.v2.nodes._
 import org.snakeyaml.engine.v2.serializer.Serializer
 
 import java.io.StringWriter
-import scala.collection.JavaConverters._
+import Conversions._
 
 object SnakePrinter extends Printer {
 

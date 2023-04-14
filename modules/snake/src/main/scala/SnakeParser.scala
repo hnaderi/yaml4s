@@ -25,7 +25,8 @@ import org.snakeyaml.engine.v2.scanner.StreamReader
 import java.io.StringReader
 import java.io.{Reader => JReader}
 import java.util.Optional
-import scala.collection.JavaConverters._
+
+import Conversions._
 
 object SnakeParser extends Parser {
   private val settings = LoadSettings.builder.build
@@ -101,8 +102,8 @@ object SnakeParser extends Parser {
 
   private[this] def parseStream(
       reader: JReader
-  ): Either[ParsingFailure, Stream[Node]] =
-    catchNonFatal(createComposer(reader).asScala.toStream).leftMap(err =>
+  ): Either[ParsingFailure, List[Node]] =
+    catchNonFatal(createComposer(reader).asScala.toList).leftMap(err =>
       ParsingFailure(err.getMessage, err)
     )
 
@@ -186,11 +187,11 @@ object SnakeParser extends Parser {
             .asScala
             .foldLeft[Either[ParsingFailure, Map[String, T]]](
               Right(Map.empty)
-            ) { (objEither, tup) =>
+            ) { case (objEither, tup) =>
               for {
                 obj <- objEither
                 key <- convertKeyNode(tup.getKeyNode)
-                value <- yamlToJson(tup.getValueNode)
+                value <- yamlToJson[T](tup.getValueNode)
               } yield obj.updated(key, value)
             }
             .map(w.yobject)
@@ -198,13 +199,13 @@ object SnakeParser extends Parser {
           sequence.getValue.asScala
             .foldLeft[Either[ParsingFailure, List[T]]](
               Right(List.empty)
-            ) { (arrEither, node) =>
+            ) { case (arrEither, node) =>
               for {
                 arr <- arrEither
-                value <- yamlToJson(node)
+                value <- yamlToJson[T](node)
               } yield value :: arr
             }
-            .map(w.yarray)
+            .map(w.yarray(_))
         case scalar: ScalarNode => convertScalarNode(scalar)
       }
     }
