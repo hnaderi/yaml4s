@@ -16,19 +16,6 @@
 
 package tests
 
-import munit.FunSuite
 import dev.hnaderi.libyaml._
 
-class Test extends FunSuite {
-  test("sanity") {
-    val input =
-      scala.io.Source
-        .fromFile("data/test5.yaml")
-        .getLines()
-        .mkString("\n")
-
-    val node = SnakeParser.parse[YAML](input)
-    println(node)
-    node.map(SnakePrinter.print).foreach(println)
-  }
-}
+class Test extends ParserTestSuite(SnakeParser, SnakePrinter)

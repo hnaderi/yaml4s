@@ -16,10 +16,9 @@
 
 package tests
 
-import munit.FunSuite
 import dev.hnaderi.libyaml._
 
-class Test extends FunSuite {
+class Test extends ParserTestSuite(JSYaml, JSYaml) {
   test("sanity") {
     val input = """
 data:

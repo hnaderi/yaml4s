@@ -27,6 +27,7 @@ lazy val root = tlCrossRootProject.aggregate(
   libyaml,
   jsyaml,
   snakeyaml,
+  tests,
   docs
 )
 
@@ -34,10 +35,6 @@ def module(mname: String): CrossProject => CrossProject =
   _.in(file(s"modules/$mname"))
     .settings(
       name := s"module-$mname",
-      libraryDependencies ++= Seq(
-        "org.scalameta" %%% "munit" % "1.0.0-M7" % Test,
-        "org.scalameta" %%% "munit-scalacheck" % "1.0.0-M7" % Test
-      ),
       moduleName := s"yaml4s-$mname"
     )
 
@@ -49,13 +46,13 @@ lazy val core = module("core") {
 lazy val libyaml = module("libyaml") {
   crossProject(NativePlatform)
     .crossType(CrossType.Pure)
-    .dependsOn(core)
+    .dependsOn(core, tests % Test)
 }
 
 lazy val jsyaml = module("jsyaml") {
   crossProject(JSPlatform)
     .crossType(CrossType.Pure)
-    .dependsOn(core)
+    .dependsOn(core, tests % Test)
     .settings(
       Compile / npmDependencies ++= Seq("js-yaml" -> "4.1.0"),
       scalaJSUseMainModuleInitializer := true,
@@ -67,9 +64,22 @@ lazy val jsyaml = module("jsyaml") {
 lazy val snakeyaml = module("snake") {
   crossProject(JVMPlatform)
     .crossType(CrossType.Pure)
-    .dependsOn(core)
+    .dependsOn(core, tests % Test)
     .settings(
       libraryDependencies += "org.snakeyaml" % "snakeyaml-engine" % "2.6"
+    )
+}
+
+lazy val tests = module("tests") {
+  crossProject(JVMPlatform, JSPlatform, NativePlatform)
+    .crossType(CrossType.Pure)
+    .dependsOn(core)
+    .enablePlugins(NoPublishPlugin)
+    .settings(
+      libraryDependencies ++= Seq(
+        "org.scalameta" %%% "munit" % "1.0.0-M7",
+        "org.scalameta" %%% "munit-scalacheck" % "1.0.0-M7"
+      )
     )
 }
 

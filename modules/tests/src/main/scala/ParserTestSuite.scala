@@ -17,5 +17,39 @@
 package tests
 
 import dev.hnaderi.libyaml._
+import munit.FunSuite
 
-class Test extends ParserTestSuite(LibyamlParser, LibyamlPrinter)
+abstract class ParserTestSuite(parser: Parser, printer: Printer)
+    extends FunSuite {
+  test("Empty") {
+    parser.parse[YAML]("")
+  }
+
+  test("sanity") {
+    val input = """
+data:
+  double-quoted: "data"
+  single-quoted: 'data'
+  not quoted: data
+  folded: |
+    line 1
+    line 2
+  quoted: >
+    data 1
+    data 2
+    data 3
+  boolean 1: true
+  boolean 2: Yes
+  boolean 3: false
+  boolean 4: NO
+  not boolean 1: "Yes"
+  not boolean 2: "true"
+  number: 123
+"""
+
+    val yaml = parser.parse[YAML](input)
+    println(yaml)
+
+    yaml.map(printer.print).foreach(println)
+  }
+}
