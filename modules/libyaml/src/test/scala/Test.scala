@@ -14,40 +14,31 @@
  * limitations under the License.
  */
 
-package dev.hnaderi.libyaml
+package tests
 
-object Main {
-  def main(args: Array[String]) = {
-    val input = """
-data:
-  double-quoted: "data"
-  single-quoted: 'data'
-  not quoted: data
-  folded: |
-    line 1
-    line 2
-  quoted: >
-    data 1
-    data 2
-    data 3
-  boolean 1: true
-  boolean 2: Yes
-  boolean 3: false
-  boolean 4: NO
-  not boolean 1: "Yes"
-  not boolean 2: "true"
----
-{a: 1}
----
-{b: 2}
-"""
-    val obj = JSYaml.parseDocuments[YAML](input)
-    obj.foreach { y =>
-      println(y)
+import munit.FunSuite
+import dev.hnaderi.libyaml._
 
-      println()
+class Test extends FunSuite {
+  test("sanity") {
+    val input =
+      scala.io.Source
+        .fromFile("data/test5.yaml")
+        .getLines()
+        .mkString("\n")
 
-      y.map(JSYaml.print).foreach(println)
-    }
+    // val yaml = Right(
+    //   YAML.YObj(
+    //     Seq(
+    //       "a" -> YAML.False,
+    //       "b" -> YAML.YArr(Seq(YAML.YInt(1), YAML.YDouble(20.34)))
+    //     )
+    //   )
+    // )
+    val yaml = LibyamlParser.parse[YAML](input)
+    println(yaml)
+
+    yaml.map(LibyamlPrinter.print).foreach(println)
+
   }
 }
