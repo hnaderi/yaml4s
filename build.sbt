@@ -74,3 +74,14 @@ lazy val snakeyaml = module("snake") {
 }
 
 lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)
+
+val vcpkgBaseDir = "C:/vcpkg/"
+ThisBuild / nativeConfig ~= { c =>
+  if (BuildEnv.isWindows) { // vcpkg-installed curl
+    c.withCompileOptions(
+      c.compileOptions :+ s"-I${vcpkgBaseDir}/installed/x64-windows/include/"
+    ).withLinkingOptions(
+      c.linkingOptions :+ s"-L${vcpkgBaseDir}/installed/x64-windows/lib/"
+    )
+  } else c
+}
