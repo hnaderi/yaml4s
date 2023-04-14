@@ -1,15 +1,21 @@
-ThisBuild / githubWorkflowBuildMatrixFailFast := Some(
-  false
-) // This is a huge build matrix! so it's better to find problems rather than failing prematurely.
-ThisBuild / githubWorkflowOSes := Seq("ubuntu-latest")
-
-ThisBuild / githubWorkflowBuildMatrixInclusions ++= Seq(
-  MatrixInclude(Map("project" -> "rootNative"), Map("os" -> "ubuntu-latest")),
-  MatrixInclude(Map("project" -> "rootNative"), Map("os" -> "ubuntu-20.04")),
-  MatrixInclude(Map("project" -> "rootNative"), Map("os" -> "windows-2022")),
-  MatrixInclude(Map("project" -> "rootNative"), Map("os" -> "macos-11")),
-  MatrixInclude(Map("project" -> "rootNative"), Map("os" -> "macos-12"))
+// This is a huge build matrix! so it's better to find problems rather than failing prematurely.
+ThisBuild / githubWorkflowBuildMatrixFailFast := Some(false)
+ThisBuild / githubWorkflowOSes := Seq(
+  "ubuntu-latest",
+  "ubuntu-20.04",
+  "windows-2022",
+  "macos-11",
+  "macos-12"
 )
+
+ThisBuild / githubWorkflowBuildMatrixExclusions ++= githubWorkflowOSes.value
+  .filter(_ != "ubuntu-latest")
+  .flatMap(os =>
+    Seq(
+      MatrixExclude(Map("project" -> "rootJS", "os" -> os)),
+      MatrixExclude(Map("project" -> "rootJVM", "os" -> os))
+    )
+  )
 
 ThisBuild / githubWorkflowJobSetup ++= Seq(
   WorkflowStep.Run(
