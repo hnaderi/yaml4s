@@ -25,7 +25,7 @@ sealed trait YAML extends Any {
     case YArr(value) => w.yarray(value.map(_.transform[T]))
     case YObj(value) =>
       w.yobject(value.map { case (k, v) => (k, v.transform[T]) })
-    case YNumber(value) => w.ynull // TODO
+    case YNumber(value) => w.ybigdecimal(value.toBigDecimal)
     case YString(value) => w.ystring(value)
     case YBool(value)   => w.ybool(value)
     case YNull          => w.ynull
