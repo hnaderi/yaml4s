@@ -3,7 +3,7 @@ ThisBuild / githubWorkflowBuildMatrixFailFast := Some(false)
 ThisBuild / githubWorkflowOSes := Seq(
   "ubuntu-latest",
   "ubuntu-20.04",
-  "windows-2022",
+  // "windows-2022", // disable for now, there is some linking problem
   "macos-11",
   "macos-12"
 )

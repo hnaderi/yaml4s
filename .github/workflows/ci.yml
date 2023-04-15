@@ -31,7 +31,6 @@ jobs:
         os:
           - ubuntu-latest
           - ubuntu-20.04
-          - windows-2022
           - macos-11
           - macos-12
         scala: [3.2.2, 2.13.10, 2.12.17]
@@ -43,10 +42,6 @@ jobs:
           - project: rootJVM
             os: ubuntu-20.04
           - project: rootJS
-            os: windows-2022
-          - project: rootJVM
-            os: windows-2022
-          - project: rootJS
             os: macos-11
           - project: rootJVM
             os: macos-11
@@ -56,11 +51,6 @@ jobs:
             os: macos-12
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Ignore line ending differences in git
-        if: contains(runner.os, 'windows')
-        shell: bash
-        run: git config --global core.autocrlf false
-
       - name: Checkout current branch (full)
         uses: actions/checkout@v3
         with:
@@ -96,65 +86,53 @@ jobs:
 
       - name: Install libyaml (ubuntu)
         if: startsWith(matrix.os, 'ubuntu') && matrix.project == 'rootNative'
-        shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install libyaml-dev
 
       - name: Install libyaml (macos)
         if: startsWith(matrix.os, 'macos') && matrix.project == 'rootNative'
-        shell: bash
         run: brew install libyaml
 
       - name: Install libyaml (windows)
         if: startsWith(matrix.os, 'windows') && matrix.project == 'rootNative'
-        shell: bash
         run: |
           vcpkg integrate install
           vcpkg install --triplet x64-windows libyaml
 
       - name: Check that workflows are up to date
         if: '!startsWith(matrix.os, ''windows'')'
-        shell: bash
         run: sbt githubWorkflowCheck
 
       - name: Check headers and formatting
         if: matrix.java == 'temurin@8' && matrix.os == 'ubuntu-latest'
-        shell: bash
         run: sbt 'project ${{ matrix.project }}' '++ ${{ matrix.scala }}' headerCheckAll scalafmtCheckAll 'project /' scalafmtSbtCheck
 
       - name: scalaJSLink
         if: matrix.project == 'rootJS'
-        shell: bash
         run: sbt 'project ${{ matrix.project }}' '++ ${{ matrix.scala }}' Test/scalaJSLinkerResult
 
       - name: nativeLink
         if: matrix.project == 'rootNative'
-        shell: bash
         run: sbt 'project ${{ matrix.project }}' '++ ${{ matrix.scala }}' Test/nativeLink
 
       - name: Test
-        shell: bash
         run: sbt 'project ${{ matrix.project }}' '++ ${{ matrix.scala }}' test
 
       - name: Check binary compatibility
         if: matrix.java == 'temurin@8' && matrix.os == 'ubuntu-latest'
-        shell: bash
         run: sbt 'project ${{ matrix.project }}' '++ ${{ matrix.scala }}' mimaReportBinaryIssues
 
       - name: Generate API documentation
         if: matrix.java == 'temurin@8' && matrix.os == 'ubuntu-latest'
-        shell: bash
         run: sbt 'project ${{ matrix.project }}' '++ ${{ matrix.scala }}' doc
 
       - name: Make target directories
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
-        shell: bash
         run: mkdir -p target .js/target modules/core/.native/target site/target modules/jsyaml/.js/target modules/core/.js/target modules/libyaml/.native/target modules/core/.jvm/target modules/tests/.js/target .jvm/target modules/snake/.jvm/target .native/target modules/tests/.jvm/target modules/tests/.native/target project/target
 
       - name: Compress target directories
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
-        shell: bash
         run: tar cf targets.tar target .js/target modules/core/.native/target site/target modules/jsyaml/.js/target modules/core/.js/target modules/libyaml/.native/target modules/core/.jvm/target modules/tests/.js/target .jvm/target modules/snake/.jvm/target .native/target modules/tests/.jvm/target modules/tests/.native/target project/target
 
       - name: Upload target directories
@@ -175,10 +153,6 @@ jobs:
         java: [temurin@8]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Ignore line ending differences in git
-        if: contains(runner.os, 'windows')
-        run: git config --global core.autocrlf false
-
       - name: Checkout current branch (full)
         uses: actions/checkout@v3
         with:
@@ -341,10 +315,6 @@ jobs:
         java: [temurin@8]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Ignore line ending differences in git
-        if: contains(runner.os, 'windows')
-        run: git config --global core.autocrlf false
-
       - name: Checkout current branch (full)
         uses: actions/checkout@v3
         with:
