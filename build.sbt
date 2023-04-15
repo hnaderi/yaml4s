@@ -28,6 +28,11 @@ lazy val root = tlCrossRootProject.aggregate(
   jsyaml,
   snakeyaml,
   tests,
+  circe,
+  `spray-json`,
+  `play-json`,
+  json4s,
+  `zio-json`,
   docs
 )
 
@@ -80,6 +85,58 @@ lazy val tests = module("tests") {
         "org.scalameta" %%% "munit" % "1.0.0-M7",
         "org.scalameta" %%% "munit-scalacheck" % "1.0.0-M7"
       )
+    )
+}
+
+lazy val circe = module("circe") {
+  crossProject(JVMPlatform, JSPlatform, NativePlatform)
+    .crossType(CrossType.Pure)
+    .dependsOn(core)
+    .settings(
+      libraryDependencies += "io.circe" %%% "circe-core" % "0.14.5"
+    )
+}
+
+lazy val `spray-json` = module("spray-json") {
+  crossProject(JVMPlatform)
+    .crossType(CrossType.Pure)
+    .dependsOn(core)
+    .settings(
+      description := "spray-json codecs for kubernetes data models",
+      libraryDependencies +=
+        "io.spray" %%% "spray-json" % "1.3.6"
+    )
+}
+
+lazy val `play-json` = module("play-json") {
+  crossProject(JVMPlatform)
+    .crossType(CrossType.Pure)
+    .dependsOn(core)
+    .settings(
+      description := "play-json codecs for kubernetes data models",
+      libraryDependencies +=
+        ("com.typesafe.play" %%% "play-json" % "2.9.4")
+          .cross(CrossVersion.for3Use2_13)
+    )
+}
+
+lazy val json4s = module("json4s") {
+  crossProject(JVMPlatform, JSPlatform, NativePlatform)
+    .crossType(CrossType.Pure)
+    .dependsOn(core)
+    .settings(
+      description := "json4s codecs for kubernetes data models",
+      libraryDependencies += "org.json4s" %%% "json4s-ast" % "4.0.6"
+    )
+}
+
+lazy val `zio-json` = module("zio-json") {
+  crossProject(JVMPlatform, JSPlatform)
+    .crossType(CrossType.Pure)
+    .dependsOn(core)
+    .settings(
+      description := "zio-json codecs for kubernetes data models",
+      libraryDependencies += "dev.zio" %%% "zio-json" % "0.5.0"
     )
 }
 
