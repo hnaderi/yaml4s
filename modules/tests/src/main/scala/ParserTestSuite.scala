@@ -25,14 +25,10 @@ abstract class ParserTestSuite(
 ) extends FunSuite {
 
   test("json") {
-    val yaml = parser.parse[YAML]("""{ "a" : 1, "b": ["c", "d"] }""")
-    assertEquals(
-      yaml,
-      Right(
-        YAML.obj(
-          "a" -> YAML.number(1),
-          "b" -> YAML.arr(YAML.str("c"), YAML.str("d"))
-        )
+    assertParses("""{ "a" : 1, "b": ["c", "d"] }""")(
+      YAML.obj(
+        "a" -> YAML.number(1),
+        "b" -> YAML.arr(YAML.str("c"), YAML.str("d"))
       )
     )
   }
@@ -64,4 +60,44 @@ data:
 
     yaml.map(printer.print).foreach(println)
   }
+
+  test("boolean") {
+    assertParses("true")(YAML.True)
+    assertParses("false")(YAML.False)
+  }
+
+  test("not booleans") {
+    // because it is stupid!
+    assertParses("Yes")(YAML.str("Yes"))
+    assertParses("NO")(YAML.str("NO"))
+  }
+
+  test("numerics") {
+    assertParses("123")(YAML.number(123))
+    assertParses("123.456")(YAML.number(123.456))
+    assertParses("1234.5678")(YAML.number(BigDecimal("1234.5678")))
+  }
+
+  test("sequences") {
+    assertParses("[1, 2, 3]")(
+      YAML.arr(YAML.number(1), YAML.number(2), YAML.number(3))
+    )
+    assertParses("- 1\n- 2\n- 3")(
+      YAML.arr(YAML.number(1), YAML.number(2), YAML.number(3))
+    )
+  }
+
+  test("mappings") {
+    assertParses("""
+a: 1
+b: 2
+""")(YAML.obj("a" -> YAML.number(1), "b" -> YAML.number(2)))
+  }
+
+  protected def assertParses(s: String)(yaml: YAML) = {
+    val res = parser.parse[YAML](s)
+    assertEquals(res, Right(yaml))
+    res.map(printer.print(_)).foreach(println(_))
+  }
+  protected def assertFails(s: String) = assert(parser.parse[YAML](s).isLeft)
 }

@@ -79,8 +79,8 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
     if (mustBeString) w.ystring(str)
     else
       str match {
-        case "true" | "Yes" => w.ytrue
-        case "false" | "NO" => w.yfalse
+        case "true"         => w.ytrue
+        case "false"        => w.yfalse
         case Numeric(value) => w.ybigdecimal(value)
         case other          => w.ystring(other)
       }
