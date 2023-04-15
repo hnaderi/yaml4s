@@ -197,13 +197,13 @@ object SnakeParser extends Parser {
             .map(w.yobject)
         case sequence: SequenceNode =>
           sequence.getValue.asScala
-            .foldLeft[Either[ParsingFailure, List[T]]](
-              Right(List.empty)
+            .foldLeft[Either[ParsingFailure, Vector[T]]](
+              Right(Vector.empty)
             ) { case (arrEither, node) =>
               for {
                 arr <- arrEither
                 value <- yamlToJson[T](node)
-              } yield value :: arr
+              } yield arr :+ value
             }
             .map(w.yarray(_))
         case scalar: ScalarNode => convertScalarNode(scalar)

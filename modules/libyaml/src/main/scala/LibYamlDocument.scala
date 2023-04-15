@@ -81,9 +81,10 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
       str match {
         case "true" | "Yes" => w.ytrue
         case "false" | "NO" => w.yfalse
-        // TODO numbers!
-        case other => w.ystring(other)
+        case Numeric(value) => w.ybigdecimal(value)
+        case other          => w.ystring(other)
       }
+
   }
 
   private def visitSeq[T](
@@ -125,5 +126,13 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
     }
 
     result.toMap
+  }
+}
+
+private object Numeric {
+  def unapply(s: String): Option[BigDecimal] = try {
+    Some(BigDecimal(s))
+  } catch {
+    case _: NumberFormatException => None
   }
 }

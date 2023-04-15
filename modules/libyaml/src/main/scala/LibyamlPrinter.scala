@@ -129,27 +129,7 @@ object LibyamlPrinter extends Printer {
           value.length(),
           stringStyle(value)
         )
-      case YInt(value) =>
-        val str = value.toString()
-        val v = asYamlChar(str)
-        yaml_document_add_scalar(
-          document,
-          null,
-          v,
-          str.length(),
-          YAML_PLAIN_SCALAR_STYLE
-        )
-      case YLong(value) =>
-        val str = value.toString()
-        val v = asYamlChar(str)
-        yaml_document_add_scalar(
-          document,
-          null,
-          v,
-          str.length(),
-          YAML_PLAIN_SCALAR_STYLE
-        )
-      case YDouble(value) =>
+      case YNumber(value) =>
         val str = value.toString()
         val v = asYamlChar(str)
         yaml_document_add_scalar(

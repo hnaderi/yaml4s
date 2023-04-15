@@ -16,36 +16,41 @@
 
 package dev.hnaderi.libyaml
 
+import scala.collection.mutable.LinkedHashMap
+
 sealed trait YAML extends Any {
   def foldTo[T: Writer]: T
 }
 object YAML {
   sealed trait Scalar extends Any with YAML
-  final case class YString(value: String) extends AnyVal with Scalar {
+  private[libyaml] final case class YString(value: String)
+      extends AnyVal
+      with Scalar {
     def foldTo[T](implicit b: Writer[T]): T = b.ystring(value)
   }
-  final case class YInt(value: Int) extends AnyVal with Scalar {
-    def foldTo[T](implicit b: Writer[T]): T = b.yint(value)
+  private[libyaml] final case class YNumber(value: YamlNumber)
+      extends AnyVal
+      with Scalar {
+    def foldTo[T](implicit b: Writer[T]): T = b.ynull
   }
-  final case class YLong(value: Long) extends AnyVal with Scalar {
-    def foldTo[T](implicit b: Writer[T]): T = b.ylong(value)
-  }
-  final case class YDouble(value: Double) extends AnyVal with Scalar {
-    def foldTo[T](implicit b: Writer[T]): T = b.ydouble(value)
-  }
-  final case class YBool(value: Boolean) extends AnyVal with Scalar {
+  private[libyaml] final case class YBool(value: Boolean)
+      extends AnyVal
+      with Scalar {
     def foldTo[T](implicit b: Writer[T]): T = b.ybool(value)
   }
-  final case class YArr(value: Seq[YAML]) extends AnyVal with YAML {
+  private[libyaml] final case class YArr(value: Vector[YAML])
+      extends AnyVal
+      with YAML {
     def foldTo[T](implicit b: Writer[T]): T = b.yarray(value.map(_.foldTo[T]))
   }
-  final case class YObj(value: Seq[(String, YAML)]) extends AnyVal with YAML {
+  private[libyaml] final case class YObj(value: LinkedHashMap[String, YAML])
+      extends AnyVal
+      with YAML {
     def foldTo[T](implicit b: Writer[T]): T =
       b.yobject(value.map { case (k, v) => (k, v.foldTo[T]) })
-    def add(k: String, v: YAML): YObj = YObj((k, v) +: value)
   }
   object YObj {
-    val empty = YObj(Nil)
+    val empty = YObj(LinkedHashMap.empty)
   }
   case object YNull extends Scalar {
     def foldTo[T](implicit b: Writer[T]): T = b.ynull
@@ -53,31 +58,40 @@ object YAML {
   val False = YBool(false)
   val True = YBool(true)
 
+  def obj(vs: (String, YAML)*): YObj = YObj(LinkedHashMap(vs: _*))
+  def arr(vs: YAML*): YArr = YArr(vs.toVector)
+  def number(n: Int): YNumber = YNumber(YamlNumber(n.toLong))
+  def number(n: Long): YNumber = YNumber(YamlNumber(n))
+  def number(n: Double): YNumber = YNumber(YamlNumber(n))
+  def number(n: BigDecimal): YNumber = YNumber(YamlNumber(n))
+  def bool(b: Boolean): YBool = if (b) True else False
+  def str(s: String): YString = YString(s)
+
   implicit val writerInstance: Writer[YAML] = new Writer[YAML] {
+
+    override def yfalse: YAML = False
+
+    override def ytrue: YAML = True
+
+    override def ydouble(d: Double): YAML = number(d)
+
+    override def ylong(l: Long): YAML = number(l)
+
+    override def yint(i: Int): YAML = number(i)
+
+    override def ybigdecimal(i: BigDecimal): YAML = number(i)
 
     override def ystring(s: String): YAML = YString(s)
 
-    override def ydouble(d: Double): YAML = YDouble(d)
-
-    override def yobject(vs: Iterable[(String, YAML)]): YAML = YObj(vs.toSeq)
+    override def yobject(vs: Iterable[(String, YAML)]): YAML = YObj(
+      LinkedHashMap.newBuilder.++=(vs).result()
+    )
 
     override def ynull: YAML = YNull
 
-    override def ynum(s: String, decIndex: Int, expIndex: Int): YAML = YString(
-      s
-    ) // TODO
-
-    override def yarray(vs: Iterable[YAML]): YAML = YArr(vs.toSeq)
-
-    override def yint(i: Int): YAML = YInt(i)
+    override def yarray(vs: Iterable[YAML]): YAML = YArr(vs.toVector)
 
     override def ybool(b: Boolean): YAML = YBool(b)
-
-    override def ylong(l: Long): YAML = YLong(l)
-
-    override def yfalse: YAML = YBool(false)
-
-    override def ytrue: YAML = YBool(true)
 
   }
 
@@ -89,23 +103,17 @@ object YAML {
     }
 
     override def int(t: YAML): Either[String, Int] = t match {
-      case YInt(i)                    => Right(i)
-      case YLong(l) if l.isValidInt   => Right(l.toInt)
-      case YDouble(l) if l.isValidInt => Right(l.toInt)
-      case _                          => Left("Not a valid integer!")
+      case YNumber(i) => i.toInt.toRight("Not valid integer!")
+      case _          => Left("Not a valid integer!")
     }
 
     override def long(t: YAML): Either[String, Long] = t match {
-      case YLong(l)                => Right(l)
-      case YInt(i)                 => Right(i.toLong)
-      case YDouble(l) if l.isWhole => Right(l.toLong)
-      case _                       => Left("Not a valid long!")
+      case YNumber(l) => l.toLong.toRight("Not a valid long!")
+      case _          => Left("Not a valid long!")
     }
 
     override def double(t: YAML): Either[String, Double] = t match {
-      case YDouble(l) => Right(l)
-      case YLong(l)   => Right(l.toDouble)
-      case YInt(i)    => Right(i.toDouble)
+      case YNumber(l) => Right(l.toDouble)
       case _          => Left("Not a valid double!")
     }
 

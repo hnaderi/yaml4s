@@ -19,10 +19,22 @@ package tests
 import dev.hnaderi.libyaml._
 import munit.FunSuite
 
-abstract class ParserTestSuite(parser: Parser, printer: Printer)
-    extends FunSuite {
-  test("Empty") {
-    parser.parse[YAML]("")
+abstract class ParserTestSuite(
+    parser: Parser,
+    printer: Printer
+) extends FunSuite {
+
+  test("json") {
+    val yaml = parser.parse[YAML]("""{ "a" : 1, "b": ["c", "d"] }""")
+    assertEquals(
+      yaml,
+      Right(
+        YAML.obj(
+          "a" -> YAML.number(1),
+          "b" -> YAML.arr(YAML.str("c"), YAML.str("d"))
+        )
+      )
+    )
   }
 
   test("sanity") {

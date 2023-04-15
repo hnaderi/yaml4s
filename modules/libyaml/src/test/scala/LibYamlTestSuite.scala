@@ -18,4 +18,4 @@ package tests
 
 import dev.hnaderi.libyaml._
 
-class Test extends ParserTestSuite(SnakeParser, SnakePrinter)
+class LibYamlTestSuite extends ParserTestSuite(LibyamlParser, LibyamlPrinter)

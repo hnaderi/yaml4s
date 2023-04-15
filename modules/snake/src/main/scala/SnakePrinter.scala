@@ -81,11 +81,10 @@ object SnakePrinter extends Printer {
     )
   }
   private def jsonToYaml(json: YAML): Node = json match {
-    case YString(str)   => stringNode(str)
-    case YInt(value)    => scalarNode(Tag.INT, value.toString)
-    case YLong(value)   => scalarNode(Tag.INT, value.toString)
-    case YDouble(value) => scalarNode(Tag.FLOAT, value.toString)
-    case YBool(value)   => scalarNode(Tag.BOOL, value.toString)
+    case YString(str) => stringNode(str)
+    case YNumber(value) =>
+      scalarNode(if (value.isWhole) Tag.INT else Tag.FLOAT, value.toString)
+    case YBool(value) => scalarNode(Tag.BOOL, value.toString)
     case YArr(arr) =>
       new SequenceNode(
         Tag.SEQ,

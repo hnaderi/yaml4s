@@ -57,9 +57,7 @@ object JSYaml extends Parser with Printer {
   private[this] def convertYAMLToJSUnsafe[T](input: YAML): js.Any =
     input match {
       case YString(value) => value
-      case YInt(value)    => value
-      case YLong(value)   => value.toDouble
-      case YDouble(value) => value
+      case YNumber(value) => value.toDouble
       case YBool(value)   => value
       case YArr(value)    => value.map(convertYAMLToJSUnsafe).toJSArray
       case YObj(value) =>
