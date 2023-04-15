@@ -24,6 +24,14 @@ abstract class ParserTestSuite(
     printer: Printer
 ) extends FunSuite {
 
+  test("fails to parse empty string") {
+    assertFails("")
+  }
+
+  test("fails to parse blank string") {
+    assertFails("  ")
+  }
+
   test("json") {
     assertParses("""{ "a" : 1, "b": ["c", "d"] }""")(
       YAML.obj(
@@ -69,6 +77,8 @@ data:
   test("not booleans") {
     // because it is stupid!
     assertParses("Yes")(YAML.str("Yes"))
+    assertParses("yes")(YAML.str("yes"))
+    assertParses("no")(YAML.str("no"))
     assertParses("NO")(YAML.str("NO"))
   }
 
@@ -94,10 +104,40 @@ b: 2
 """)(YAML.obj("a" -> YAML.number(1), "b" -> YAML.number(2)))
   }
 
-  protected def assertParses(s: String)(yaml: YAML) = {
+  test("aliases") {
+    val alias = YAML.obj("foo" -> YAML.str("bar"))
+    assertParses(
+      """
+          | aliases:
+          |   - &alias1
+          |     foo:
+          |       bar
+          | baz:
+          |  - *alias1
+          |  - *alias1
+          |""".stripMargin
+    )(
+      YAML.obj(
+        "aliases" -> YAML.arr(alias),
+        "baz" -> YAML.arr(alias, alias)
+      )
+    )
+  }
+
+  // TODO libyaml does not respect this
+  test("fails on invalid tag".ignore) {
+    assertFails("!!int 12foo")
+  }
+
+  protected def assertParses(
+      s: String
+  )(yaml: YAML)(implicit l: munit.Location): Unit = {
     val res = parser.parse[YAML](s)
     assertEquals(res, Right(yaml))
     res.map(printer.print(_)).foreach(println(_))
   }
-  protected def assertFails(s: String) = assert(parser.parse[YAML](s).isLeft)
+  protected def assertFails(s: String)(implicit l: munit.Location): Unit = {
+    val result = parser.parse[YAML](s)
+    assert(result.isLeft, result.toString)
+  }
 }

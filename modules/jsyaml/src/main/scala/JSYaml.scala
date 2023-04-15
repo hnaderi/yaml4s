@@ -29,7 +29,8 @@ object JSYaml extends Parser with Printer {
   override def print(t: YAML): String = JS.dump(convertYAMLToJSUnsafe(t))
 
   override def parse[T: Writer](input: String): Either[Throwable, T] =
-    Try(JS.load(input)).toEither.map(convertAnyToJsonUnsafe[T](_))
+    if (input.isEmpty || input.forall(_.isWhitespace)) Left(NoDocument)
+    else Try(JS.load(input)).toEither.map(convertAnyToJsonUnsafe[T](_))
 
   override def parseDocuments[T: Writer](
       yaml: String
@@ -75,4 +76,7 @@ object JSYaml extends Parser with Printer {
     final def loadAll(str: String): js.Array[Any] = js.native
     final def dump(obj: js.Any): String = js.native
   }
+
+  case object NoDocument
+      extends Exception("Expected at least one document, but found none!")
 }
