@@ -19,41 +19,52 @@ package dev.hnaderi.libyaml
 import scala.collection.mutable.LinkedHashMap
 
 sealed trait YAML extends Any {
-  def foldTo[T: Writer]: T
+  def transform[T: Writer]: T
+
+  import dev.hnaderi.libyaml.YAML._
+  final def fold[T](folder: YAML.Folder[T]): T = this match {
+    case YArr(value)    => folder.onArray(value)
+    case YObj(value)    => folder.onObject(value.toMap)
+    case YNumber(value) => folder.onNumber(value)
+    case YString(value) => folder.onString(value)
+    case YBool(value)   => folder.onBoolean(value)
+    case YNull          => folder.onNull
+  }
 }
 object YAML {
   sealed trait Scalar extends Any with YAML
   private[libyaml] final case class YString(value: String)
       extends AnyVal
       with Scalar {
-    def foldTo[T](implicit b: Writer[T]): T = b.ystring(value)
+    def transform[T](implicit b: Writer[T]): T = b.ystring(value)
   }
   private[libyaml] final case class YNumber(value: YamlNumber)
       extends AnyVal
       with Scalar {
-    def foldTo[T](implicit b: Writer[T]): T = b.ynull
+    def transform[T](implicit b: Writer[T]): T = b.ynull
   }
   private[libyaml] final case class YBool(value: Boolean)
       extends AnyVal
       with Scalar {
-    def foldTo[T](implicit b: Writer[T]): T = b.ybool(value)
+    def transform[T](implicit b: Writer[T]): T = b.ybool(value)
   }
   private[libyaml] final case class YArr(value: Vector[YAML])
       extends AnyVal
       with YAML {
-    def foldTo[T](implicit b: Writer[T]): T = b.yarray(value.map(_.foldTo[T]))
+    def transform[T](implicit b: Writer[T]): T =
+      b.yarray(value.map(_.transform[T]))
   }
   private[libyaml] final case class YObj(value: LinkedHashMap[String, YAML])
       extends AnyVal
       with YAML {
-    def foldTo[T](implicit b: Writer[T]): T =
-      b.yobject(value.map { case (k, v) => (k, v.foldTo[T]) })
+    def transform[T](implicit b: Writer[T]): T =
+      b.yobject(value.map { case (k, v) => (k, v.transform[T]) })
   }
-  object YObj {
+  private object YObj {
     val empty = YObj(LinkedHashMap.empty)
   }
   case object YNull extends Scalar {
-    def foldTo[T](implicit b: Writer[T]): T = b.ynull
+    def transform[T](implicit b: Writer[T]): T = b.ynull
   }
   val False = YBool(false)
   val True = YBool(true)
@@ -132,5 +143,14 @@ object YAML {
         case YObj(fs) => Right(fs)
         case _        => Left("Not an object!")
       }
+  }
+
+  trait Folder[T] {
+    def onNull: T
+    def onBoolean(value: Boolean): T
+    def onNumber(value: YamlNumber): T
+    def onString(value: String): T
+    def onArray(value: Vector[YAML]): T
+    def onObject(value: Map[String, YAML]): T
   }
 }
