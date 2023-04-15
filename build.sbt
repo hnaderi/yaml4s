@@ -46,12 +46,18 @@ def module(mname: String): CrossProject => CrossProject =
 lazy val core = module("core") {
   crossProject(NativePlatform, JSPlatform, JVMPlatform)
     .crossType(CrossType.Pure)
+    .settings(
+      description := "yaml4s core"
+    )
 }
 
 lazy val libyaml = module("libyaml") {
   crossProject(NativePlatform)
     .crossType(CrossType.Pure)
     .dependsOn(core, tests % Test)
+    .settings(
+      description := "yaml4s Native parser using libyaml"
+    )
 }
 
 lazy val jsyaml = module("jsyaml") {
@@ -59,6 +65,7 @@ lazy val jsyaml = module("jsyaml") {
     .crossType(CrossType.Pure)
     .dependsOn(core, tests % Test)
     .settings(
+      description := "yaml4s JS parser using js-yaml",
       Compile / npmDependencies ++= Seq("js-yaml" -> "4.1.0"),
       scalaJSUseMainModuleInitializer := true,
       scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
@@ -71,6 +78,7 @@ lazy val snakeyaml = module("snake") {
     .crossType(CrossType.Pure)
     .dependsOn(core, tests % Test)
     .settings(
+      description := "yaml4s JVM parser using snake yaml engine",
       libraryDependencies += "org.snakeyaml" % "snakeyaml-engine" % "2.6"
     )
 }
@@ -93,6 +101,7 @@ lazy val circe = module("circe") {
     .crossType(CrossType.Pure)
     .dependsOn(core)
     .settings(
+      description := "yaml4s integration with circe",
       libraryDependencies += "io.circe" %%% "circe-core" % "0.14.5"
     )
 }
@@ -102,7 +111,7 @@ lazy val `spray-json` = module("spray-json") {
     .crossType(CrossType.Pure)
     .dependsOn(core)
     .settings(
-      description := "spray-json codecs for kubernetes data models",
+      description := "yaml4s integration with spray-json",
       libraryDependencies +=
         "io.spray" %%% "spray-json" % "1.3.6"
     )
@@ -113,7 +122,7 @@ lazy val `play-json` = module("play-json") {
     .crossType(CrossType.Pure)
     .dependsOn(core)
     .settings(
-      description := "play-json codecs for kubernetes data models",
+      description := "yaml4s integration with play-json",
       libraryDependencies +=
         ("com.typesafe.play" %%% "play-json" % "2.9.4")
           .cross(CrossVersion.for3Use2_13)
@@ -125,7 +134,7 @@ lazy val json4s = module("json4s") {
     .crossType(CrossType.Pure)
     .dependsOn(core)
     .settings(
-      description := "json4s codecs for kubernetes data models",
+      description := "yaml4s integration with json4s",
       libraryDependencies += "org.json4s" %%% "json4s-ast" % "4.0.6"
     )
 }
@@ -135,7 +144,7 @@ lazy val `zio-json` = module("zio-json") {
     .crossType(CrossType.Pure)
     .dependsOn(core)
     .settings(
-      description := "zio-json codecs for kubernetes data models",
+      description := "yaml4s integration with zio-json",
       libraryDependencies += "dev.zio" %%% "zio-json" % "0.5.0"
     )
 }
