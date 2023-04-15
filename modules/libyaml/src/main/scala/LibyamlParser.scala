@@ -38,7 +38,6 @@ object LibyamlParser extends Parser {
 
         document = struct_yaml_document_s()
         _ <- handle(yaml_parser_load(parser, document), DocumentLoadFailed)
-        _ = println("d")
 
         doc = new LibYamlDocument(document)
 

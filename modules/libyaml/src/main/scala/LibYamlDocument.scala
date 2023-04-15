@@ -44,7 +44,6 @@ final class LibYamlDocument(private val document: Ptr[yaml_document_t])
   )(implicit z: Zone, w: Writer[T]): T = {
     val nodeType = root.`type`
 
-    println(fromCString(root.tag.asInstanceOf[CString]))
     nodeType match {
       case enum_yaml_node_type_e.YAML_MAPPING_NODE =>
         w.yobject(visitMapping(document, root.data.mapping))

@@ -19,9 +19,18 @@ package dev.hnaderi.libyaml
 import scala.collection.mutable.LinkedHashMap
 
 sealed trait YAML extends Any {
-  def transform[T: Writer]: T
-
   import dev.hnaderi.libyaml.YAML._
+
+  final def transform[T](implicit w: Writer[T]): T = this match {
+    case YArr(value) => w.yarray(value.map(_.transform[T]))
+    case YObj(value) =>
+      w.yobject(value.map { case (k, v) => (k, v.transform[T]) })
+    case YNumber(value) => w.ynull // TODO
+    case YString(value) => w.ystring(value)
+    case YBool(value)   => w.ybool(value)
+    case YNull          => w.ynull
+  }
+
   final def fold[T](folder: YAML.Folder[T]): T = this match {
     case YArr(value)    => folder.onArray(value)
     case YObj(value)    => folder.onObject(value.toMap)
@@ -30,42 +39,65 @@ sealed trait YAML extends Any {
     case YBool(value)   => folder.onBoolean(value)
     case YNull          => folder.onNull
   }
+
+  def isNull: Boolean = false
+  def isBoolean: Boolean = false
+  def isNumber: Boolean = false
+  def isString: Boolean = false
+  def isArray: Boolean = false
+  def isObject: Boolean = false
+
+  def asNull: Option[Unit] = None
+  def asBoolean: Option[Boolean] = None
+  def asNumber: Option[YamlNumber] = None
+  def asString: Option[String] = None
+  def asArray: Option[Vector[YAML]] = None
+  def asObject: Option[Map[String, YAML]] = None
+
 }
 object YAML {
   sealed trait Scalar extends Any with YAML
+
   private[libyaml] final case class YString(value: String)
       extends AnyVal
       with Scalar {
-    def transform[T](implicit b: Writer[T]): T = b.ystring(value)
+    override def isString: Boolean = true
+    override def asString: Option[String] = Some(value)
   }
+
   private[libyaml] final case class YNumber(value: YamlNumber)
       extends AnyVal
       with Scalar {
-    def transform[T](implicit b: Writer[T]): T = b.ynull
+    override def isNumber: Boolean = true
+    override def asNumber: Option[YamlNumber] = Some(value)
   }
+
   private[libyaml] final case class YBool(value: Boolean)
       extends AnyVal
       with Scalar {
-    def transform[T](implicit b: Writer[T]): T = b.ybool(value)
+    override def isBoolean: Boolean = true
+    override def asBoolean: Option[Boolean] = Some(value)
   }
+
   private[libyaml] final case class YArr(value: Vector[YAML])
       extends AnyVal
       with YAML {
-    def transform[T](implicit b: Writer[T]): T =
-      b.yarray(value.map(_.transform[T]))
+    override def isArray: Boolean = true
+    override def asArray: Option[Vector[YAML]] = Some(value)
   }
+
   private[libyaml] final case class YObj(value: LinkedHashMap[String, YAML])
       extends AnyVal
       with YAML {
-    def transform[T](implicit b: Writer[T]): T =
-      b.yobject(value.map { case (k, v) => (k, v.transform[T]) })
+    override def isObject: Boolean = true
+    override def asObject: Option[Map[String, YAML]] = Some(value.toMap)
   }
-  private object YObj {
-    val empty = YObj(LinkedHashMap.empty)
-  }
+
   case object YNull extends Scalar {
-    def transform[T](implicit b: Writer[T]): T = b.ynull
+    override def isNull: Boolean = true
+    override def asNull: Option[Unit] = Some(())
   }
+
   val False = YBool(false)
   val True = YBool(true)
 
@@ -104,45 +136,6 @@ object YAML {
 
     override def ybool(b: Boolean): YAML = YBool(b)
 
-  }
-
-  implicit val readerInstance: Reader[YAML] = new Reader[YAML] {
-
-    override def string(t: YAML): Either[String, String] = t match {
-      case YString(v) => Right(v)
-      case _          => Left("Not a string!")
-    }
-
-    override def int(t: YAML): Either[String, Int] = t match {
-      case YNumber(i) => i.toInt.toRight("Not valid integer!")
-      case _          => Left("Not a valid integer!")
-    }
-
-    override def long(t: YAML): Either[String, Long] = t match {
-      case YNumber(l) => l.toLong.toRight("Not a valid long!")
-      case _          => Left("Not a valid long!")
-    }
-
-    override def double(t: YAML): Either[String, Double] = t match {
-      case YNumber(l) => Right(l.toDouble)
-      case _          => Left("Not a valid double!")
-    }
-
-    override def bool(t: YAML): Either[String, Boolean] = t match {
-      case YBool(b) => Right(b)
-      case _        => Left("Not a boolean value!")
-    }
-
-    override def array(t: YAML): Either[String, Iterable[YAML]] = t match {
-      case YArr(vs) => Right(vs)
-      case _        => Left("Not an array!")
-    }
-
-    override def obj(t: YAML): Either[String, Iterable[(String, YAML)]] =
-      t match {
-        case YObj(fs) => Right(fs)
-        case _        => Left("Not an object!")
-      }
   }
 
   trait Folder[T] {
