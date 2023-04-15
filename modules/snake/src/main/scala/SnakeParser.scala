@@ -140,7 +140,8 @@ object SnakeParser extends Parser {
           flattener.construct(node) match {
             case int: Integer         => w.yint(int)
             case long: java.lang.Long => w.ylong(long)
-            // case bigint: java.math.BigInteger => JsonDecimal(bigint.toString) //TODO
+            case bigint: java.math.BigInteger =>
+              w.ybigdecimal(BigDecimal(bigint))
             case other =>
               throw new NumberFormatException(
                 s"Unexpected number type: ${other.getClass}"
