@@ -18,4 +18,4 @@ package tests
 
 import dev.hnaderi.yaml4s._
 
-class JSYamlTestSuite extends ParserTestSuite(JSYaml)
+class JSYamlTestSuite extends BackendTestSuite(JSYaml)

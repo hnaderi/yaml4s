@@ -19,7 +19,7 @@ package tests
 import dev.hnaderi.yaml4s._
 import munit.FunSuite
 
-abstract class ParserTestSuite(backend: YamlBackend) extends FunSuite {
+abstract class BackendTestSuite(backend: YamlBackend) extends FunSuite {
 
   test("fails to parse empty string") {
     assertFails("")
