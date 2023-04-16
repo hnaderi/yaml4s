@@ -20,32 +20,33 @@ import play.api.libs.json._
 
 package object playjson {
   implicit object PlayJsonWriter extends Writer[JsValue] {
-
     override def ynull: JsValue = JsNull
-
     override def yfalse: JsValue = JsFalse
-
     override def ytrue: JsValue = JsTrue
-
     override def ybool(b: Boolean): JsValue = JsBoolean(b)
-
     override def ydouble(d: Double): JsValue = JsNumber(d)
-
     override def ylong(l: Long): JsValue = JsNumber(l)
-
     override def yint(i: Int): JsValue = JsNumber(i)
-
     override def ybigdecimal(i: BigDecimal): JsValue = JsNumber(i)
-
     override def ystring(s: String): JsValue = JsString(s)
-
     override def yarray(vs: Iterable[JsValue]): JsValue = JsArray(
       vs.toIndexedSeq
     )
-
     override def yobject(vs: Iterable[(String, JsValue)]): JsValue = JsObject(
       vs.toSeq
     )
+  }
 
+  implicit object PlayJsonVisitable extends Visitable[JsValue] {
+    override def visit[O](t: JsValue, visitor: Visitor[JsValue, O]): O =
+      t match {
+        case JsNumber(value)      => visitor.onNumber(YamlNumber(value))
+        case JsObject(underlying) => visitor.onObject(underlying)
+        case JsString(value)      => visitor.onString(value)
+        case JsNull               => visitor.onNull
+        case JsArray(value)       => visitor.onArray(value)
+        case JsFalse              => visitor.onBoolean(false)
+        case JsTrue               => visitor.onBoolean(true)
+      }
   }
 }
