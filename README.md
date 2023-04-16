@@ -11,6 +11,19 @@
 <img alt="GitHub" src="https://img.shields.io/github/license/hnaderi/yaml4s?style=flat-square">  
 [![Scala Steward badge](https://img.shields.io/badge/Scala_Steward-helping-blue.svg?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAQCAMAAAARSr4IAAAAVFBMVEUAAACHjojlOy5NWlrKzcYRKjGFjIbp293YycuLa3pYY2LSqql4f3pCUFTgSjNodYRmcXUsPD/NTTbjRS+2jomhgnzNc223cGvZS0HaSD0XLjbaSjElhIr+AAAAAXRSTlMAQObYZgAAAHlJREFUCNdNyosOwyAIhWHAQS1Vt7a77/3fcxxdmv0xwmckutAR1nkm4ggbyEcg/wWmlGLDAA3oL50xi6fk5ffZ3E2E3QfZDCcCN2YtbEWZt+Drc6u6rlqv7Uk0LdKqqr5rk2UCRXOk0vmQKGfc94nOJyQjouF9H/wCc9gECEYfONoAAAAASUVORK5CYII=)](https://scala-steward.org)
 
+## What is this library?
+This library is a cross platform yaml parsing and printing library that supports full yaml spec (1.2 on jvm and js, 1.1 on native),
+that focuses on simplicity, extensibility while remaining ecosystem agnostic.  
+Aside from its own data model (named `YAML`), this library also supports and provides several integrations with popular json libraries,
+in which you can parse and print directly from without any intermediate object generation.
+Current integrations include: `circe`, `zio json`, `play json`, `json4s`, `spray json`, 
+also integrations can be added very easily, open an issue or submit a PR if you want any other integrations with other major libraries.
+
+## What this library is not?
+If you want a full blown yaml manipulation library with direct yaml AST support, this library is not the solution to your problem;
+however if you want using YAML as a serialization format this library is the perfect choice, as it adds support for latest YAML spec to your
+favorite JSON library and you don't need to learn something new or deal with complex YAML syntax!
+
 ## Getting started
 visit [Project site](https://projects.hnaderi.dev/yaml4s/) to see tutorials and docs.
 
