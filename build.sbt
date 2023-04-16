@@ -1,3 +1,4 @@
+import laika.ast.Image
 import sbtcrossproject.CrossProject
 
 ThisBuild / tlBaseVersion := "0.0"
@@ -168,7 +169,7 @@ lazy val docs = project
     `zio-json`.jvm,
     `spray-json`.jvm
   )
-  .enablePlugins(TypelevelSitePlugin)
+  .enablePlugins(Yaml4sSitePlugin)
 
 lazy val unidocs = project
   .in(file("unidocs"))
