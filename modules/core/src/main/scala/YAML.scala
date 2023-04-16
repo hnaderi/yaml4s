@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package dev.hnaderi.libyaml
+package dev.hnaderi.yaml4s
 
 import scala.collection.mutable.LinkedHashMap
 
 sealed trait YAML extends Any {
-  import dev.hnaderi.libyaml.YAML._
+  import dev.hnaderi.yaml4s.YAML._
 
   final def transform[T](implicit w: Writer[T]): T = this match {
     case YArr(value) => w.yarray(value.map(_.transform[T]))
@@ -58,35 +58,29 @@ sealed trait YAML extends Any {
 object YAML {
   sealed trait Scalar extends Any with YAML
 
-  private[libyaml] final case class YString(value: String)
-      extends AnyVal
-      with Scalar {
+  private final case class YString(value: String) extends AnyVal with Scalar {
     override def isString: Boolean = true
     override def asString: Option[String] = Some(value)
   }
 
-  private[libyaml] final case class YNumber(value: YamlNumber)
+  private final case class YNumber(value: YamlNumber)
       extends AnyVal
       with Scalar {
     override def isNumber: Boolean = true
     override def asNumber: Option[YamlNumber] = Some(value)
   }
 
-  private[libyaml] final case class YBool(value: Boolean)
-      extends AnyVal
-      with Scalar {
+  private final case class YBool(value: Boolean) extends AnyVal with Scalar {
     override def isBoolean: Boolean = true
     override def asBoolean: Option[Boolean] = Some(value)
   }
 
-  private[libyaml] final case class YArr(value: Vector[YAML])
-      extends AnyVal
-      with YAML {
+  private final case class YArr(value: Vector[YAML]) extends AnyVal with YAML {
     override def isArray: Boolean = true
     override def asArray: Option[Vector[YAML]] = Some(value)
   }
 
-  private[libyaml] final case class YObj(value: LinkedHashMap[String, YAML])
+  private final case class YObj(value: LinkedHashMap[String, YAML])
       extends AnyVal
       with YAML {
     override def isObject: Boolean = true
@@ -98,17 +92,17 @@ object YAML {
     override def asNull: Option[Unit] = Some(())
   }
 
-  val False = YBool(false)
-  val True = YBool(true)
+  val False: YAML = YBool(false)
+  val True: YAML = YBool(true)
 
-  def obj(vs: (String, YAML)*): YObj = YObj(LinkedHashMap(vs: _*))
-  def arr(vs: YAML*): YArr = YArr(vs.toVector)
-  def number(n: Int): YNumber = YNumber(YamlNumber(n.toLong))
-  def number(n: Long): YNumber = YNumber(YamlNumber(n))
-  def number(n: Double): YNumber = YNumber(YamlNumber(n))
-  def number(n: BigDecimal): YNumber = YNumber(YamlNumber(n))
-  def bool(b: Boolean): YBool = if (b) True else False
-  def str(s: String): YString = YString(s)
+  def obj(vs: (String, YAML)*): YAML = YObj(LinkedHashMap(vs: _*))
+  def arr(vs: YAML*): YAML = YArr(vs.toVector)
+  def number(n: Int): YAML = YNumber(YamlNumber(n.toLong))
+  def number(n: Long): YAML = YNumber(YamlNumber(n))
+  def number(n: Double): YAML = YNumber(YamlNumber(n))
+  def number(n: BigDecimal): YAML = YNumber(YamlNumber(n))
+  def bool(b: Boolean): YAML = if (b) True else False
+  def str(s: String): YAML = YString(s)
 
   implicit val writerInstance: Writer[YAML] = new Writer[YAML] {
 

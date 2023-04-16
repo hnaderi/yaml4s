@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.hnaderi.libyaml
+package dev.hnaderi.yaml4s
 
 sealed abstract class YamlNumber extends Serializable {
 

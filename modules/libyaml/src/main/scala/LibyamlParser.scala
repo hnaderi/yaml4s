@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.hnaderi.libyaml
+package dev.hnaderi.yaml4s
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -23,7 +23,7 @@ import scala.scalanative.unsafe._
 import binding.libyaml._
 import binding.others._
 
-private[libyaml] trait LibyamlParser extends Parser {
+private[yaml4s] trait LibyamlParser extends Parser {
 
   override def parse[T: Writer](input: String): Either[Throwable, T] = Zone {
     implicit zone =>

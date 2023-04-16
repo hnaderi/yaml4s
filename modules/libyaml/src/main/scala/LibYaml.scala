@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package dev.hnaderi.libyaml
+package dev.hnaderi.yaml4s
 
 object LibYaml extends YamlBackend with LibyamlPrinter with LibyamlParser

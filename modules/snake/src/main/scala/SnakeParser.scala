@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.hnaderi.libyaml
+package dev.hnaderi.yaml4s
 package snakeyaml
 
 import org.snakeyaml.engine.v2.api.LoadSettings
@@ -29,7 +29,7 @@ import java.util.Optional
 
 import Conversions._
 
-private[libyaml] trait SnakeParser extends Parser {
+private[yaml4s] trait SnakeParser extends Parser {
   private val settings = LoadSettings.builder.build
 
   override def parse[T: Writer](input: String): Either[Throwable, T] =

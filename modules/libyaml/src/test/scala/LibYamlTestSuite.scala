@@ -16,6 +16,6 @@
 
 package tests
 
-import dev.hnaderi.libyaml._
+import dev.hnaderi.yaml4s._
 
 class LibYamlTestSuite extends ParserTestSuite(LibYaml)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.hnaderi.libyaml
+package dev.hnaderi.yaml4s
 
 import scala.scalanative.runtime
 import scala.scalanative.unsafe._
@@ -24,7 +24,7 @@ import binding.libyaml._
 import binding.others._
 import binding.definitions._
 
-private[libyaml] trait LibyamlPrinter extends Printer {
+private[yaml4s] trait LibyamlPrinter extends Printer {
 
   override def print[T: Visitable](t: T): String = Zone { implicit z =>
     val emitter = struct_yaml_emitter_s()

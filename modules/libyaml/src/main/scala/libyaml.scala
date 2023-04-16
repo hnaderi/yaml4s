@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package dev.hnaderi.libyaml.binding
+package dev.hnaderi.yaml4s.binding
 
 import scala.scalanative.unsigned._
 import scala.scalanative.unsafe._
 
-private[libyaml] object definitions {
+private[yaml4s] object definitions {
   type enum_yaml_encoding_e = CUnsignedInt
   object enum_yaml_encoding_e {
     final val YAML_ANY_ENCODING: enum_yaml_encoding_e = 0.toUInt
@@ -369,7 +369,7 @@ private[libyaml] object definitions {
 
 @link("yaml")
 @extern
-private[libyaml] object libyaml {
+private[yaml4s] object libyaml {
   import definitions._
 
   def yaml_get_version_string(): CString = extern
@@ -557,7 +557,7 @@ private[libyaml] object libyaml {
   def yaml_emitter_flush(emitter: Ptr[yaml_emitter_t]): CInt = extern
 }
 
-private[libyaml] object others {
+private[yaml4s] object others {
   import definitions._
   object implicits {
     implicit class struct_yaml_version_directive_s_ops(

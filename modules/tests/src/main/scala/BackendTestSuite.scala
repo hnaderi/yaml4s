@@ -16,7 +16,7 @@
 
 package tests
 
-import dev.hnaderi.libyaml._
+import dev.hnaderi.yaml4s._
 import munit.FunSuite
 
 abstract class ParserTestSuite(backend: YamlBackend) extends FunSuite {

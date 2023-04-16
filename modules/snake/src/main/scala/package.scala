@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.hnaderi.libyaml
+package dev.hnaderi.yaml4s
 
 package object snakeyaml {
   private[snakeyaml] implicit class CatsEitherOps[A, B](
