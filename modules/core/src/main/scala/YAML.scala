@@ -96,7 +96,12 @@ object YAML {
   val True: YAML = YBool(true)
 
   def obj(vs: (String, YAML)*): YAML = YObj(LinkedHashMap(vs: _*))
+  def obj(vs: Map[String, YAML]): YAML = YObj(
+    LinkedHashMap.newBuilder.++=(vs).result()
+  )
   def arr(vs: YAML*): YAML = YArr(vs.toVector)
+  def arr(vs: List[YAML]): YAML = YArr(vs.toVector)
+  def arr(vs: Vector[YAML]): YAML = YArr(vs)
   def number(n: Int): YAML = YNumber(YamlNumber(n.toLong))
   def number(n: Long): YAML = YNumber(YamlNumber(n))
   def number(n: Double): YAML = YNumber(YamlNumber(n))
