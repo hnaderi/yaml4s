@@ -25,7 +25,7 @@ import binding.libyaml._
 import binding.others.implicits._
 import binding.definitions._
 
-final class LibYamlDocument(private val document: Ptr[yaml_document_t])
+private final class LibYamlDocument(private val document: Ptr[yaml_document_t])
     extends AnyVal {
 
   def clean(): Unit =

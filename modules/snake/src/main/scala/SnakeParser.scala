@@ -59,19 +59,8 @@ private[libyaml] trait SnakeParser extends Parser {
       case t if scala.util.control.NonFatal(t) => Left(t)
     }
 
-  // def parse(yaml: Reader): Either[ParsingFailure, Json] = for {
-  //   parsed <- parseSingle(yaml)
-  //   json <- yamlToJson(parsed)
-  // } yield json
-
   private[this] def parseNode(yaml: String): Either[ParsingFailure, Node] =
     parseSingle(new StringReader(yaml))
-
-  // def parseDocuments(yaml: Reader): Stream[Either[ParsingFailure, Json]] = parseStream(yaml) match {
-  //   case Left(error)   => Stream(Left(error))
-  //   case Right(stream) => stream.map(yamlToJson)
-  // }
-  // def parseDocuments(yaml: String): Stream[Either[ParsingFailure, Json]] = parseDocuments(new StringReader(yaml))
 
   private[this] def asScala[T](ot: Optional[T]): Option[T] =
     if (ot.isPresent) Some(ot.get()) else None
@@ -212,7 +201,4 @@ private[libyaml] trait SnakeParser extends Parser {
       }
     }
   }
-
-  final case class ParsingFailure(msg: String, err: Throwable)
-      extends Exception("")
 }
