@@ -16,4 +16,12 @@
 
 package dev.hnaderi.yaml4s
 
-object LibYaml extends YamlBackend with LibyamlPrinter with LibyamlParser
+import binding._
+
+object LibYaml extends YamlBackend {
+  def parse[T: Writer](input: String): Either[Throwable, T] =
+    LibyamlParser.parse(input)
+  def parseDocuments[T: Writer](yaml: String): Either[Throwable, Iterable[T]] =
+    LibyamlParser.parseDocuments(yaml)
+  def print[T: Visitable](t: T): String = LibyamlPrinter.print(t)
+}

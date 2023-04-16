@@ -15,6 +15,7 @@
  */
 
 package dev.hnaderi.yaml4s
+package binding
 
 import scala.collection.mutable
 import scala.scalanative.runtime.libc

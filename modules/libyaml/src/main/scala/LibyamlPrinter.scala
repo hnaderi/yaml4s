@@ -15,16 +15,17 @@
  */
 
 package dev.hnaderi.yaml4s
+package binding
 
 import scala.scalanative.runtime
 import scala.scalanative.unsafe._
 import scala.scalanative.unsigned._
 
-import binding.libyaml._
-import binding.others._
-import binding.definitions._
+import libyaml._
+import others._
+import definitions._
 
-private[yaml4s] trait LibyamlPrinter extends Printer {
+private[yaml4s] object LibyamlPrinter extends Printer {
 
   override def print[T: Visitable](t: T): String = Zone { implicit z =>
     val emitter = struct_yaml_emitter_s()

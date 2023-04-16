@@ -15,15 +15,16 @@
  */
 
 package dev.hnaderi.yaml4s
+package binding
 
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.scalanative.unsafe._
 
-import binding.libyaml._
-import binding.others._
+import libyaml._
+import others._
 
-private[yaml4s] trait LibyamlParser extends Parser {
+private[yaml4s] object LibyamlParser extends Parser {
 
   override def parse[T: Writer](input: String): Either[Throwable, T] = Zone {
     implicit zone =>
