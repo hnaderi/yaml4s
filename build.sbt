@@ -158,7 +158,17 @@ lazy val `zio-json` = module("zio-json") {
     )
 }
 
-lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)
+lazy val docs = project
+  .in(file("site"))
+  .dependsOn(
+    backend.jvm,
+    circe.jvm,
+    json4s.jvm,
+    `play-json`.jvm,
+    `zio-json`.jvm,
+    `spray-json`.jvm
+  )
+  .enablePlugins(TypelevelSitePlugin)
 
 lazy val unidocs = project
   .in(file("unidocs"))
