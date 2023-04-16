@@ -13,7 +13,7 @@ ThisBuild / developers := List(
 ThisBuild / tlSonatypeUseLegacyHost := false
 
 ThisBuild / tlSitePublishBranch := Some("main")
-ThisBuild / tlCiReleaseBranches := Nil
+ThisBuild / tlCiReleaseBranches := Seq("main")
 
 val Scala212 = "2.12.17"
 val Scala213 = "2.13.10"
