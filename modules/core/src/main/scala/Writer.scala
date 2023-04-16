@@ -16,6 +16,11 @@
 
 package dev.hnaderi.libyaml
 
+import scala.annotation.implicitNotFound
+
+@implicitNotFound(
+  "Cannot find a way to construct ${T}, you might have missed an import"
+)
 trait Writer[T] {
   def ynull: T
 

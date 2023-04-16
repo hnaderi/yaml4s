@@ -16,6 +16,8 @@
 
 package dev.hnaderi.libyaml
 
+import scala.annotation.implicitNotFound
+
 trait Visitor[A, T] {
   def onNull: T
   def onBoolean(value: Boolean): T
@@ -25,6 +27,9 @@ trait Visitor[A, T] {
   def onObject(value: Iterable[(String, A)]): T
 }
 
+@implicitNotFound(
+  "Cannot find a way to traverse ${T}, you might have missed an import"
+)
 trait Visitable[T] {
   def visit[O](t: T, visitor: Visitor[T, O]): O
 }
