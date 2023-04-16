@@ -66,7 +66,7 @@ data:
     val yaml = parser.parse[YAML](input)
     println(yaml)
 
-    yaml.map(printer.print).foreach(println)
+    yaml.map(printer.print(_)).foreach(println)
   }
 
   test("boolean") {

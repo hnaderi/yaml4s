@@ -29,12 +29,12 @@ import Conversions._
 
 object SnakePrinter extends Printer {
 
-  override def print(t: YAML): String = {
+  override def print[T: Visitable](t: T): String = {
     val writer = new StreamToStringWriter
     val options = DumpSettings.builder().build()
     val serializer = new Serializer(options, new Emitter(options, writer))
     serializer.emitStreamStart()
-    serializer.serializeDocument(jsonToYaml(t))
+    serializer.serializeDocument(toNode(t))
     serializer.emitStreamEnd()
     writer.toString
   }
@@ -67,32 +67,35 @@ object SnakePrinter extends Printer {
   private def keyNode(value: String) =
     new ScalarNode(Tag.STR, value, scalarStyle(value))
 
-  private def convertObject(obj: YAML.YObj) = {
-    val fields = obj.value.map(_._1)
-    val m = obj.value.toMap
-    val childNodes = fields.flatMap { key =>
-      val value = m(key)
-      Some(new NodeTuple(keyNode(key), jsonToYaml(value)))
-    }
-    new MappingNode(
-      Tag.MAP,
-      childNodes.toList.asJava,
-      common.FlowStyle.AUTO
+  private def toNode[T](t: T)(implicit vis: Visitable[T]): Node =
+    vis.visit(
+      t,
+      new Visitor[T, Node] {
+        override def onNull: Node = scalarNode(Tag.NULL, "null")
+        override def onBoolean(value: Boolean): Node =
+          scalarNode(Tag.BOOL, value.toString)
+        override def onNumber(value: YamlNumber): Node =
+          scalarNode(if (value.isWhole) Tag.INT else Tag.FLOAT, value.toString)
+        override def onString(value: String): Node = stringNode(value)
+        override def onArray(value: Vector[T]): Node =
+          new SequenceNode(
+            Tag.SEQ,
+            value.map(vis.visit(_, this)).asJava,
+            common.FlowStyle.FLOW // TODO config
+          )
+        override def onObject(fields: Map[String, T]): Node = {
+          val keys = fields.map(_._1)
+          val childNodes = keys.flatMap { key =>
+            val value = fields(key)
+            Some(new NodeTuple(keyNode(key), vis.visit(value, this)))
+          }
+          new MappingNode(
+            Tag.MAP,
+            childNodes.toList.asJava,
+            common.FlowStyle.AUTO
+          )
+        }
+      }
     )
-  }
-  private def jsonToYaml(json: YAML): Node = json match {
-    case YString(str) => stringNode(str)
-    case YNumber(value) =>
-      scalarNode(if (value.isWhole) Tag.INT else Tag.FLOAT, value.toString)
-    case YBool(value) => scalarNode(Tag.BOOL, value.toString)
-    case YArr(arr) =>
-      new SequenceNode(
-        Tag.SEQ,
-        arr.map(jsonToYaml).asJava,
-        common.FlowStyle.FLOW // TODO config
-      )
-    case obj @ YObj(_) => convertObject(obj)
-    case YNull         => scalarNode(Tag.NULL, "null")
-  }
 
 }

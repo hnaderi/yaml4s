@@ -31,7 +31,7 @@ sealed trait YAML extends Any {
     case YNull          => w.ynull
   }
 
-  final def fold[T](folder: YAML.Folder[T]): T = this match {
+  final def fold[T](folder: Visitor[YAML, T]): T = this match {
     case YArr(value)    => folder.onArray(value)
     case YObj(value)    => folder.onObject(value.toMap)
     case YNumber(value) => folder.onNumber(value)
@@ -138,12 +138,8 @@ object YAML {
 
   }
 
-  trait Folder[T] {
-    def onNull: T
-    def onBoolean(value: Boolean): T
-    def onNumber(value: YamlNumber): T
-    def onString(value: String): T
-    def onArray(value: Vector[YAML]): T
-    def onObject(value: Map[String, YAML]): T
+  implicit val visitableInstance: Visitable[YAML] = new Visitable[YAML] {
+    override def visit[O](t: YAML, visitor: Visitor[YAML, O]): O =
+      t.fold(visitor)
   }
 }

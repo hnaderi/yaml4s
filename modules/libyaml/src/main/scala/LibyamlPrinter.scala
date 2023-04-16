@@ -16,8 +16,6 @@
 
 package dev.hnaderi.libyaml
 
-import dev.hnaderi.libyaml.YAML._
-
 import scala.scalanative.runtime
 import scala.scalanative.unsafe._
 import scala.scalanative.unsigned._
@@ -28,7 +26,7 @@ import binding.definitions._
 
 object LibyamlPrinter extends Printer {
 
-  override def print(t: YAML): String = Zone { implicit z =>
+  override def print[T: Visitable](t: T): String = Zone { implicit z =>
     val emitter = struct_yaml_emitter_s()
 
     yaml_emitter_initialize(emitter)
@@ -74,24 +72,66 @@ object LibyamlPrinter extends Printer {
   }
 
   private type NodeId = CInt
-  private def build(document: Ptr[yaml_document_t], yaml: YAML)(implicit
-      z: Zone
-  ): NodeId =
-    yaml match {
-      case s: YAML.Scalar =>
-        buildScalar(document, s)
-      case YArr(value) =>
+  import enum_yaml_scalar_style_e._
+
+  private def build[T](document: Ptr[yaml_document_t], yaml: T)(implicit
+      z: Zone,
+      vis: Visitable[T]
+  ): NodeId = vis.visit(
+    yaml,
+    new Visitor[T, NodeId] {
+      override def onNull: NodeId = yaml_document_add_scalar(
+        document,
+        null,
+        null,
+        0,
+        YAML_PLAIN_SCALAR_STYLE
+      )
+      override def onBoolean(value: Boolean): NodeId = {
+        val str = value.toString()
+        val v = asYamlChar(str)
+        yaml_document_add_scalar(
+          document,
+          null,
+          v,
+          str.length(),
+          YAML_PLAIN_SCALAR_STYLE
+        )
+      }
+      override def onNumber(value: YamlNumber): NodeId = {
+        val str = value.toString()
+        val v = asYamlChar(str)
+        yaml_document_add_scalar(
+          document,
+          null,
+          v,
+          str.length(),
+          YAML_PLAIN_SCALAR_STYLE
+        )
+      }
+      override def onString(value: String): NodeId = {
+        val v = asYamlChar(value)
+        yaml_document_add_scalar(
+          document,
+          null,
+          v,
+          value.length(),
+          stringStyle(value)
+        )
+      }
+      override def onArray(value: Vector[T]): NodeId = {
         val sequence = yaml_document_add_sequence(
           document,
           null,
           enum_yaml_sequence_style_e.YAML_ANY_SEQUENCE_STYLE
         )
         value.foreach { y =>
-          val item = build(document, y)
+          val item = vis.visit(y, this)
           yaml_document_append_sequence_item(document, sequence, item)
         }
         sequence
-      case YObj(value) =>
+      }
+      override def onObject(value: Map[String, T]): NodeId = {
         val mapping = yaml_document_add_mapping(
           document,
           null,
@@ -105,59 +145,13 @@ object LibyamlPrinter extends Printer {
             k.length(),
             enum_yaml_scalar_style_e.YAML_PLAIN_SCALAR_STYLE
           )
-
-          val valueId = build(document, v)
-
+          val valueId = vis.visit(v, this)
           yaml_document_append_mapping_pair(document, mapping, keyId, valueId)
         }
         mapping
+      }
     }
-
-  import enum_yaml_scalar_style_e._
-
-  private def buildScalar(
-      document: Ptr[yaml_document_t],
-      yaml: YAML.Scalar
-  )(implicit z: Zone): NodeId =
-    yaml match {
-      case YString(value) =>
-        val v = asYamlChar(value)
-        yaml_document_add_scalar(
-          document,
-          null,
-          v,
-          value.length(),
-          stringStyle(value)
-        )
-      case YNumber(value) =>
-        val str = value.toString()
-        val v = asYamlChar(str)
-        yaml_document_add_scalar(
-          document,
-          null,
-          v,
-          str.length(),
-          YAML_PLAIN_SCALAR_STYLE
-        )
-      case YBool(value) =>
-        val str = value.toString()
-        val v = asYamlChar(str)
-        yaml_document_add_scalar(
-          document,
-          null,
-          v,
-          str.length(),
-          YAML_PLAIN_SCALAR_STYLE
-        )
-      case YNull =>
-        yaml_document_add_scalar(
-          document,
-          null,
-          null,
-          0,
-          YAML_PLAIN_SCALAR_STYLE
-        )
-    }
+  )
 
   private def asYamlChar(str: String)(implicit z: Zone): Ptr[yaml_char_t] =
     toCString(str).asInstanceOf[Ptr[yaml_char_t]]

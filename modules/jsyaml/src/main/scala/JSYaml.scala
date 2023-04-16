@@ -16,8 +16,6 @@
 
 package dev.hnaderi.libyaml
 
-import dev.hnaderi.libyaml.YAML._
-
 import scala.util.Try
 
 import scalajs.js
@@ -26,7 +24,8 @@ import js.JSConverters._
 
 object JSYaml extends Parser with Printer {
 
-  override def print(t: YAML): String = JS.dump(convertYAMLToJSUnsafe(t))
+  override def print[T: Visitable](t: T): String =
+    JS.dump(convertYAMLToJSUnsafe(t))
 
   override def parse[T: Writer](input: String): Either[Throwable, T] =
     if (input.isEmpty || input.forall(_.isWhitespace)) Left(NoDocument)
@@ -55,19 +54,23 @@ object JSYaml extends Parser with Printer {
     case other if js.isUndefined(other) => w.ynull
   }
 
-  private[this] def convertYAMLToJSUnsafe[T](input: YAML): js.Any =
-    input match {
-      case YString(value) => value
-      case YNumber(value) => value.toDouble
-      case YBool(value)   => value
-      case YArr(value)    => value.map(convertYAMLToJSUnsafe).toJSArray
-      case YObj(value) =>
-        value
-          .map { case (k, v) => (k, convertYAMLToJSUnsafe(v)) }
-          .toMap
-          .toJSDictionary
-      case YNull => null
-    }
+  private[this] def convertYAMLToJSUnsafe[T](input: T)(implicit
+      vis: Visitable[T]
+  ): js.Any =
+    vis.visit(
+      input,
+      new Visitor[T, js.Any] {
+        override def onNull: js.Any = null
+        override def onBoolean(value: Boolean): js.Any = value
+        override def onNumber(value: YamlNumber): js.Any = value.toDouble
+        override def onString(value: String): js.Any = value
+        override def onArray(value: Vector[T]): js.Any =
+          value.map(vis.visit(_, this)).toJSArray
+        override def onObject(value: Map[String, T]): js.Any = value.map {
+          case (k, v) => (k, vis.visit(v, this))
+        }.toJSDictionary
+      }
+    )
 
   @JSImport("js-yaml", JSImport.Namespace)
   @js.native

@@ -16,11 +16,15 @@
 
 package dev.hnaderi.libyaml
 
-trait Parser {
-  def parse[T: Writer](input: String): Either[Throwable, T]
-  def parseDocuments[T: Writer](yaml: String): Either[Throwable, Iterable[T]]
+trait Visitor[A, T] {
+  def onNull: T
+  def onBoolean(value: Boolean): T
+  def onNumber(value: YamlNumber): T
+  def onString(value: String): T
+  def onArray(value: Vector[A]): T
+  def onObject(value: Map[String, A]): T
 }
 
-trait Printer {
-  def print[T: Visitable](t: T): String
+trait Visitable[T] {
+  def visit[O](t: T, visitor: Visitor[T, O]): O
 }
