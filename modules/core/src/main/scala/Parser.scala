@@ -23,6 +23,9 @@ trait Parser {
 
 trait Printer {
   def print[T: Visitable](t: T): String
+  def printDocuments[T: Visitable](ts: Iterable[T]): String =
+    ts.map(print(_)).mkString("\n---\n")
+  final def printAll[T: Visitable](ts: T*): String = printDocuments[T](ts)
 }
 
 trait YamlBackend extends Parser with Printer

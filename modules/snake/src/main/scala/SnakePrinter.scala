@@ -39,6 +39,16 @@ private[yaml4s] trait SnakePrinter extends Printer {
     writer.toString
   }
 
+  override def printDocuments[T: Visitable](ts: Iterable[T]): String = {
+    val writer = new StreamToStringWriter
+    val options = DumpSettings.builder().build()
+    val serializer = new Serializer(options, new Emitter(options, writer))
+    serializer.emitStreamStart()
+    ts.foreach(t => serializer.serializeDocument(toNode(t)))
+    serializer.emitStreamEnd()
+    writer.toString
+  }
+
   private[this] class StreamToStringWriter
       extends StringWriter
       with StreamDataWriter {

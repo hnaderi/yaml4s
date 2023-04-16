@@ -24,6 +24,7 @@ import scala.scalanative.unsigned._
 import libyaml._
 import others._
 import definitions._
+import LibyamlPrinter._
 
 private[yaml4s] trait LibyamlPrinter extends Printer {
 
@@ -36,7 +37,7 @@ private[yaml4s] trait LibyamlPrinter extends Printer {
     yaml_emitter_set_output(emitter, handler(_, _, _), toPtr(stringBuilder))
 
     val doc = struct_yaml_document_s()
-    yaml_document_initialize(doc, null, null, null, 0, 0)
+    yaml_document_initialize(doc, null, null, null, 1, 1)
     build(doc, t)
 
     yaml_emitter_dump(emitter, doc)
@@ -48,10 +49,13 @@ private[yaml4s] trait LibyamlPrinter extends Printer {
     stringBuilder.toString()
   }
 
-  private[this] def toPtr(a: AnyRef): Ptr[Byte] =
+}
+
+private object LibyamlPrinter {
+  private def toPtr(a: AnyRef): Ptr[Byte] =
     runtime.fromRawPtr(runtime.Intrinsics.castObjectToRawPtr(a))
 
-  private[this] def fromPtr[A](ptr: Ptr[Byte]): A =
+  private def fromPtr[A](ptr: Ptr[Byte]): A =
     runtime.Intrinsics
       .castRawPtrToObject(runtime.toRawPtr(ptr))
       .asInstanceOf[A]

@@ -69,6 +69,9 @@ data:
   test("boolean") {
     assertParses("true")(YAML.True)
     assertParses("false")(YAML.False)
+
+    assertPrints(YAML.False)("false")
+    assertPrints(YAML.True)("true")
   }
 
   test("not booleans") {
@@ -83,6 +86,9 @@ data:
     assertParses("123")(YAML.number(123))
     assertParses("123.456")(YAML.number(123.456))
     assertParses("1234.5678")(YAML.number(BigDecimal("1234.5678")))
+
+    assertPrints(YAML.number(123))("123")
+    assertPrints(YAML.number(123.456))("123.456")
   }
 
   test("sequences") {
@@ -126,6 +132,13 @@ b: 2
     assertFails("!!int 12foo")
   }
 
+  test("multi document") {
+    val docs = List(YAML.number(1), YAML.str("data"), YAML.False)
+    val result =
+      backend.parseDocuments[YAML](backend.printDocuments(docs)).map(_.toList)
+    assertEquals(result, Right(docs))
+  }
+
   protected def assertParses(
       s: String
   )(yaml: YAML)(implicit l: munit.Location): Unit = {
@@ -133,6 +146,14 @@ b: 2
     assertEquals(res, Right(yaml))
     res.map(backend.print(_)).foreach(println(_))
   }
+
+  protected def assertPrints(
+      yaml: YAML
+  )(s: String)(implicit l: munit.Location): Unit = {
+    val res = backend.print(yaml).trim()
+    assertEquals(res, s.trim())
+  }
+
   protected def assertFails(s: String)(implicit l: munit.Location): Unit = {
     val result = backend.parse[YAML](s)
     assert(result.isLeft, result.toString)
