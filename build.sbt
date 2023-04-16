@@ -33,7 +33,8 @@ lazy val root = tlCrossRootProject.aggregate(
   `play-json`,
   json4s,
   `zio-json`,
-  docs
+  docs,
+  unidocs
 )
 
 def module(mname: String): CrossProject => CrossProject =
@@ -150,6 +151,25 @@ lazy val `zio-json` = module("zio-json") {
 }
 
 lazy val docs = project.in(file("site")).enablePlugins(TypelevelSitePlugin)
+
+lazy val unidocs = project
+  .in(file("unidocs"))
+  .enablePlugins(TypelevelUnidocPlugin)
+  .settings(
+    name := "yaml4s-docs",
+    description := "unified docs for yaml4s",
+    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(
+      core.jvm,
+      libyaml.native,
+      snakeyaml.jvm,
+      jsyaml.js,
+      circe.jvm,
+      `play-json`.jvm,
+      json4s.jvm,
+      `spray-json`.jvm,
+      `zio-json`.jvm
+    )
+  )
 
 val vcpkgBaseDir = "C:/vcpkg/"
 ThisBuild / nativeConfig ~= { c =>
