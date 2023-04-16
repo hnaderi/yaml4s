@@ -19,7 +19,7 @@ package dev.hnaderi.libyaml.binding
 import scala.scalanative.unsigned._
 import scala.scalanative.unsafe._
 
-object definitions {
+private[libyaml] object definitions {
   type enum_yaml_encoding_e = CUnsignedInt
   object enum_yaml_encoding_e {
     final val YAML_ANY_ENCODING: enum_yaml_encoding_e = 0.toUInt
@@ -369,7 +369,7 @@ object definitions {
 
 @link("yaml")
 @extern
-object libyaml {
+private[libyaml] object libyaml {
   import definitions._
 
   def yaml_get_version_string(): CString = extern
@@ -557,7 +557,7 @@ object libyaml {
   def yaml_emitter_flush(emitter: Ptr[yaml_emitter_t]): CInt = extern
 }
 
-object others {
+private[libyaml] object others {
   import definitions._
   object implicits {
     implicit class struct_yaml_version_directive_s_ops(
