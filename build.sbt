@@ -27,6 +27,7 @@ lazy val root = tlCrossRootProject.aggregate(
   libyaml,
   jsyaml,
   snakeyaml,
+  backend,
   tests,
   circe,
   `spray-json`,
@@ -97,6 +98,13 @@ lazy val tests = module("tests") {
     )
 }
 
+lazy val backend = module("backend") {
+  crossProject(JVMPlatform, JSPlatform, NativePlatform)
+    .jsConfigure(_.dependsOn(jsyaml.js))
+    .jvmConfigure(_.dependsOn(snakeyaml.jvm))
+    .nativeConfigure(_.dependsOn(libyaml.native))
+}
+
 lazy val circe = module("circe") {
   crossProject(JVMPlatform, JSPlatform, NativePlatform)
     .crossType(CrossType.Pure)
@@ -163,6 +171,7 @@ lazy val unidocs = project
       libyaml.native,
       snakeyaml.jvm,
       jsyaml.js,
+      backend.jvm,
       circe.jvm,
       `play-json`.jvm,
       json4s.jvm,

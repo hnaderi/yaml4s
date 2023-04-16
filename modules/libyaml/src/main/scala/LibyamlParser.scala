@@ -24,7 +24,7 @@ import scala.scalanative.unsafe._
 import libyaml._
 import others._
 
-private[yaml4s] object LibyamlParser extends Parser {
+private[yaml4s] trait LibyamlParser extends Parser {
 
   override def parse[T: Writer](input: String): Either[Throwable, T] = Zone {
     implicit zone =>

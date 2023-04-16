@@ -22,7 +22,7 @@ import scalajs.js
 import scalajs.js.annotation.JSImport
 import js.JSConverters._
 
-object JSYaml extends YamlBackend {
+private[yaml4s] trait JSYaml extends YamlBackend {
 
   override def print[T: Visitable](t: T): String =
     JS.dump(convertYAMLToJSUnsafe(t))
@@ -75,14 +75,16 @@ object JSYaml extends YamlBackend {
       }
     )
 
-  @JSImport("js-yaml", JSImport.Namespace)
-  @js.native
-  private object JS extends js.Object {
-    final def load(str: String): Any = js.native
-    final def loadAll(str: String): js.Array[Any] = js.native
-    final def dump(obj: js.Any): String = js.native
-  }
-
   case object NoDocument
       extends Exception("Expected at least one document, but found none!")
+}
+
+object JSYaml extends JSYaml
+
+@JSImport("js-yaml", JSImport.Namespace)
+@js.native
+private object JS extends js.Object {
+  final def load(str: String): Any = js.native
+  final def loadAll(str: String): js.Array[Any] = js.native
+  final def dump(obj: js.Any): String = js.native
 }
