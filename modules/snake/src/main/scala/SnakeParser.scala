@@ -15,6 +15,7 @@
  */
 
 package dev.hnaderi.libyaml
+package snakeyaml
 
 import org.snakeyaml.engine.v2.api.LoadSettings
 import org.snakeyaml.engine.v2.composer.Composer
@@ -28,7 +29,7 @@ import java.util.Optional
 
 import Conversions._
 
-object SnakeParser extends Parser {
+private[libyaml] trait SnakeParser extends Parser {
   private val settings = LoadSettings.builder.build
 
   override def parse[T: Writer](input: String): Either[Throwable, T] =
@@ -210,16 +211,6 @@ object SnakeParser extends Parser {
         case scalar: ScalarNode => convertScalarNode(scalar)
       }
     }
-  }
-
-  private[this] implicit class CatsEitherOps[A, B](
-      private val eab: Either[A, B]
-  ) extends AnyVal {
-    def leftMap[C](f: A => C): Either[C, B] =
-      eab match {
-        case Left(a)      => Left(f(a))
-        case r @ Right(_) => r.asInstanceOf[Either[C, B]]
-      }
   }
 
   final case class ParsingFailure(msg: String, err: Throwable)

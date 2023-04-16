@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package tests
+package dev.hnaderi.libyaml
 
-import dev.hnaderi.libyaml._
-
-class JSYamlTestSuite extends ParserTestSuite(JSYaml)
+object LibYaml extends YamlBackend with LibyamlPrinter with LibyamlParser

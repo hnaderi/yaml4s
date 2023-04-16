@@ -24,7 +24,7 @@ import binding.libyaml._
 import binding.others._
 import binding.definitions._
 
-object LibyamlPrinter extends Printer {
+private[libyaml] trait LibyamlPrinter extends Printer {
 
   override def print[T: Visitable](t: T): String = Zone { implicit z =>
     val emitter = struct_yaml_emitter_s()

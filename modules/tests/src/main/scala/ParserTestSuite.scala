@@ -19,10 +19,7 @@ package tests
 import dev.hnaderi.libyaml._
 import munit.FunSuite
 
-abstract class ParserTestSuite(
-    parser: Parser,
-    printer: Printer
-) extends FunSuite {
+abstract class ParserTestSuite(backend: YamlBackend) extends FunSuite {
 
   test("fails to parse empty string") {
     assertFails("")
@@ -63,10 +60,10 @@ data:
   number: 123
 """
 
-    val yaml = parser.parse[YAML](input)
+    val yaml = backend.parse[YAML](input)
     println(yaml)
 
-    yaml.map(printer.print(_)).foreach(println)
+    yaml.map(backend.print(_)).foreach(println)
   }
 
   test("boolean") {
@@ -132,12 +129,12 @@ b: 2
   protected def assertParses(
       s: String
   )(yaml: YAML)(implicit l: munit.Location): Unit = {
-    val res = parser.parse[YAML](s)
+    val res = backend.parse[YAML](s)
     assertEquals(res, Right(yaml))
-    res.map(printer.print(_)).foreach(println(_))
+    res.map(backend.print(_)).foreach(println(_))
   }
   protected def assertFails(s: String)(implicit l: munit.Location): Unit = {
-    val result = parser.parse[YAML](s)
+    val result = backend.parse[YAML](s)
     assert(result.isLeft, result.toString)
   }
 }

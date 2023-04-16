@@ -15,6 +15,7 @@
  */
 
 package dev.hnaderi.libyaml
+package snakeyaml
 
 import org.snakeyaml.engine.v2.api.DumpSettings
 import org.snakeyaml.engine.v2.api.StreamDataWriter
@@ -26,7 +27,7 @@ import org.snakeyaml.engine.v2.serializer.Serializer
 import java.io.StringWriter
 import Conversions._
 
-object SnakePrinter extends Printer {
+private[libyaml] trait SnakePrinter extends Printer {
 
   override def print[T: Visitable](t: T): String = {
     val writer = new StreamToStringWriter

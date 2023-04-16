@@ -22,7 +22,7 @@ import scalajs.js
 import scalajs.js.annotation.JSImport
 import js.JSConverters._
 
-object JSYaml extends Parser with Printer {
+object JSYaml extends YamlBackend {
 
   override def print[T: Visitable](t: T): String =
     JS.dump(convertYAMLToJSUnsafe(t))

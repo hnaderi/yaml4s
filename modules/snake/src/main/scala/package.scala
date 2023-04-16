@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package tests
+package dev.hnaderi.libyaml
 
-import dev.hnaderi.libyaml._
-
-class JSYamlTestSuite extends ParserTestSuite(JSYaml)
+package object snakeyaml {
+  private[snakeyaml] implicit class CatsEitherOps[A, B](
+      private val eab: Either[A, B]
+  ) extends AnyVal {
+    def leftMap[C](f: A => C): Either[C, B] =
+      eab match {
+        case Left(a)      => Left(f(a))
+        case r @ Right(_) => r.asInstanceOf[Either[C, B]]
+      }
+  }
+}

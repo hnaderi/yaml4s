@@ -24,3 +24,5 @@ trait Parser {
 trait Printer {
   def print[T: Visitable](t: T): String
 }
+
+trait YamlBackend extends Parser with Printer

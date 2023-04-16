@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package tests
+package dev.hnaderi.libyaml
 
-import dev.hnaderi.libyaml._
+import snakeyaml._
 
-class JSYamlTestSuite extends ParserTestSuite(JSYaml)
+object SnakeYaml extends YamlBackend with SnakeParser with SnakePrinter
