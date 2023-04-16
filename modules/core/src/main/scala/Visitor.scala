@@ -21,8 +21,8 @@ trait Visitor[A, T] {
   def onBoolean(value: Boolean): T
   def onNumber(value: YamlNumber): T
   def onString(value: String): T
-  def onArray(value: Vector[A]): T
-  def onObject(value: Map[String, A]): T
+  def onArray(value: Iterable[A]): T
+  def onObject(value: Iterable[(String, A)]): T
 }
 
 trait Visitable[T] {

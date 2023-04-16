@@ -119,7 +119,7 @@ object LibyamlPrinter extends Printer {
           stringStyle(value)
         )
       }
-      override def onArray(value: Vector[T]): NodeId = {
+      override def onArray(value: Iterable[T]): NodeId = {
         val sequence = yaml_document_add_sequence(
           document,
           null,
@@ -131,7 +131,7 @@ object LibyamlPrinter extends Printer {
         }
         sequence
       }
-      override def onObject(value: Map[String, T]): NodeId = {
+      override def onObject(value: Iterable[(String, T)]): NodeId = {
         val mapping = yaml_document_add_mapping(
           document,
           null,

@@ -16,7 +16,6 @@
 
 package dev.hnaderi.libyaml
 
-import dev.hnaderi.libyaml.YAML._
 import org.snakeyaml.engine.v2.api.DumpSettings
 import org.snakeyaml.engine.v2.api.StreamDataWriter
 import org.snakeyaml.engine.v2.common
@@ -77,16 +76,17 @@ object SnakePrinter extends Printer {
         override def onNumber(value: YamlNumber): Node =
           scalarNode(if (value.isWhole) Tag.INT else Tag.FLOAT, value.toString)
         override def onString(value: String): Node = stringNode(value)
-        override def onArray(value: Vector[T]): Node =
+        override def onArray(value: Iterable[T]): Node =
           new SequenceNode(
             Tag.SEQ,
-            value.map(vis.visit(_, this)).asJava,
+            value.map(vis.visit(_, this)).toList.asJava,
             common.FlowStyle.FLOW // TODO config
           )
-        override def onObject(fields: Map[String, T]): Node = {
+        override def onObject(fields: Iterable[(String, T)]): Node = {
+          val map = fields.toMap
           val keys = fields.map(_._1)
           val childNodes = keys.flatMap { key =>
-            val value = fields(key)
+            val value = map(key)
             Some(new NodeTuple(keyNode(key), vis.visit(value, this)))
           }
           new MappingNode(

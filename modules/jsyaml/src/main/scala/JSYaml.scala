@@ -64,11 +64,14 @@ object JSYaml extends Parser with Printer {
         override def onBoolean(value: Boolean): js.Any = value
         override def onNumber(value: YamlNumber): js.Any = value.toDouble
         override def onString(value: String): js.Any = value
-        override def onArray(value: Vector[T]): js.Any =
+        override def onArray(value: Iterable[T]): js.Any =
           value.map(vis.visit(_, this)).toJSArray
-        override def onObject(value: Map[String, T]): js.Any = value.map {
-          case (k, v) => (k, vis.visit(v, this))
-        }.toJSDictionary
+        override def onObject(value: Iterable[(String, T)]): js.Any = value
+          .map { case (k, v) =>
+            (k, vis.visit(v, this))
+          }
+          .toMap
+          .toJSDictionary
       }
     )
 

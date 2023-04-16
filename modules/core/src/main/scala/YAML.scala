@@ -33,7 +33,7 @@ sealed trait YAML extends Any {
 
   final def fold[T](folder: Visitor[YAML, T]): T = this match {
     case YArr(value)    => folder.onArray(value)
-    case YObj(value)    => folder.onObject(value.toMap)
+    case YObj(value)    => folder.onObject(value)
     case YNumber(value) => folder.onNumber(value)
     case YString(value) => folder.onString(value)
     case YBool(value)   => folder.onBoolean(value)
