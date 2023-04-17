@@ -15,7 +15,7 @@
 This library is a cross platform yaml parsing and printing library that supports full yaml spec (1.2 on jvm and js, 1.1 on native),
 that focuses on simplicity, extensibility while remaining ecosystem agnostic.  
 Aside from its own data model (named `YAML`), this library also supports and provides several integrations with popular json libraries,
-in which you can parse and print directly from without any intermediate object generation.
+in which you can parse to and print from directly, without any intermediate object generation.  
 Current integrations include: `circe`, `zio json`, `play json`, `json4s`, `spray json`, 
 also integrations can be added very easily, open an issue or submit a PR if you want any other integrations with other major libraries.
 
