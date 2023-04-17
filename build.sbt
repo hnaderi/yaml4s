@@ -1,7 +1,7 @@
 import laika.ast.Image
 import sbtcrossproject.CrossProject
 
-ThisBuild / tlBaseVersion := "0.0"
+ThisBuild / tlBaseVersion := "0.1"
 
 ThisBuild / organization := "dev.hnaderi"
 ThisBuild / organizationName := "Hossein Naderi"
