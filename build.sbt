@@ -17,7 +17,7 @@ ThisBuild / tlSitePublishBranch := Some("main")
 ThisBuild / tlCiReleaseBranches := Seq("main")
 
 val Scala212 = "2.12.17"
-val Scala213 = "2.13.10"
+val Scala213 = "2.13.11"
 val Scala3 = "3.3.0"
 
 ThisBuild / scalaVersion := Scala212
