@@ -93,8 +93,8 @@ lazy val tests = module("tests") {
     .enablePlugins(NoPublishPlugin)
     .settings(
       libraryDependencies ++= Seq(
-        "org.scalameta" %%% "munit" % "1.0.0-M7",
-        "org.scalameta" %%% "munit-scalacheck" % "1.0.0-M7"
+        "org.scalameta" %%% "munit" % "1.0.0-M8",
+        "org.scalameta" %%% "munit-scalacheck" % "1.0.0-M8"
       )
     )
 }
