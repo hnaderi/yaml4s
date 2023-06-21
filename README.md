@@ -24,6 +24,17 @@ If you want a full blown yaml manipulation library with direct yaml AST support,
 however if you want using YAML as a serialization format this library is the perfect choice, as it adds support for latest YAML spec to your
 favorite JSON library and you don't need to learn something new or deal with complex YAML syntax!
 
+## Why this library?
+<p align="center">
+  <img src="./docs/meme.jpg" alt="Angel tells a man: It says you should be in hell, but since you were a YAML engineer, we will consider that as time served." />
+</p>
+
+YAML can easily be the worst serialization format you may encounter in your career, but it's life and we need to do shit sometimes!  
+This library is a pragmatic solution that tries to empower the scala ecosystem and all of its tribes by adding the YAML support to other existing libraries.  
+If all you want is reading and writing YAML, with complete spec support, without trying to implement it from scratch in Scala, this library is the perfect fit.
+
+Besides that, it's here to warm your heart in those dark times you need to work with YAML!
+
 ## Getting started
 visit [Project site](https://projects.hnaderi.dev/yaml4s/) to see tutorials and docs.
 
