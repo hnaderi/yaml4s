@@ -82,7 +82,7 @@ lazy val snakeyaml = module("snake") {
     .dependsOn(core, tests % Test)
     .settings(
       description := "yaml4s JVM parser using snake yaml engine",
-      libraryDependencies += "org.snakeyaml" % "snakeyaml-engine" % "2.6"
+      libraryDependencies += "org.snakeyaml" % "snakeyaml-engine" % "2.7"
     )
 }
 
