@@ -112,7 +112,7 @@ lazy val circe = module("circe") {
     .dependsOn(core)
     .settings(
       description := "yaml4s integration with circe",
-      libraryDependencies += "io.circe" %%% "circe-core" % "0.14.5"
+      libraryDependencies += "io.circe" %%% "circe-core" % "0.14.6"
     )
 }
 
