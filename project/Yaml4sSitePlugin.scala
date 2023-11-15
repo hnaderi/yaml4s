@@ -1,12 +1,8 @@
 import laika.ast.Path.Root
 import laika.ast._
-import laika.config.ConfigBuilder
 import laika.config.LaikaKeys
 import laika.helium.Helium
 import laika.helium.config._
-import laika.rewrite.link.ApiLinks
-import laika.rewrite.link.SourceLinks
-import laika.rewrite.link.LinkConfig
 import laika.theme._
 import org.typelevel.sbt.TypelevelSitePlugin
 import org.typelevel.sbt.TypelevelSitePlugin.autoImport.*
@@ -45,7 +41,13 @@ object Yaml4sSitePlugin extends AutoPlugin {
         )
         .site
         .mainNavigation(appendLinks =
-          Seq(ThemeNavigationSection("Related projects", relatedProjects))
+          Seq(
+            ThemeNavigationSection(
+              "Related projects",
+              relatedProjects.head,
+              relatedProjects.tail: _*
+            )
+          )
         )
 
     }
