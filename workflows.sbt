@@ -1,5 +1,6 @@
 // This is a huge build matrix! so it's better to find problems rather than failing prematurely.
 ThisBuild / githubWorkflowBuildMatrixFailFast := Some(false)
+ThisBuild / tlSiteJavaVersion := JavaSpec.temurin("17")
 ThisBuild / githubWorkflowOSes := Seq(
   "ubuntu-latest",
   "ubuntu-20.04",
