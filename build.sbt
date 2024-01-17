@@ -135,7 +135,7 @@ lazy val `play-json` = module("play-json") {
     .settings(
       description := "yaml4s integration with play-json",
       libraryDependencies +=
-        ("org.playframework" %%% "play-json" % "3.0.1")
+        ("org.playframework" %%% "play-json" % "3.0.2")
           .cross(CrossVersion.for3Use2_13)
     )
 }
