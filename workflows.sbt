@@ -41,6 +41,20 @@ ThisBuild / githubWorkflowJobSetup ++= Seq(
   )
 )
 
+ThisBuild / githubWorkflowAddedJobs += WorkflowJob(
+  id = "post-build",
+  name = "post build",
+  needs = List("build"),
+  steps = List(
+    WorkflowStep.Run(
+      commands = List("echo success!"),
+      name = Some("post build")
+    )
+  ),
+  scalas = Nil,
+  javas = Nil
+)
+
 // NOTE apparently githubWorkflowCheck does not work as intended on windows
 // due to file separator differences
 ThisBuild / githubWorkflowGeneratedCI ~= {
