@@ -28,19 +28,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - ubuntu-20.04
-          - macos-11
-          - macos-12
+        os: [ubuntu-latest, macos-11, macos-12]
         scala: [3, 2.13, 2.12]
         java: [temurin@8]
         project: [rootJS, rootJVM, rootNative]
         exclude:
-          - project: rootJS
-            os: ubuntu-20.04
-          - project: rootJVM
-            os: ubuntu-20.04
           - project: rootJS
             os: macos-11
           - project: rootJVM
