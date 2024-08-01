@@ -4,8 +4,8 @@ ThisBuild / tlSiteJavaVersion := JavaSpec.temurin("17")
 ThisBuild / githubWorkflowOSes := Seq(
   "ubuntu-latest",
   // "windows-2022", // disable for now, there is some linking problem
-  "macos-11",
-  "macos-12"
+  "macos-13",
+  "macos-latest"
 )
 
 ThisBuild / githubWorkflowBuildMatrixExclusions ++= githubWorkflowOSes.value
