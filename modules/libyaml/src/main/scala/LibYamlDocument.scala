@@ -18,7 +18,7 @@ package dev.hnaderi.yaml4s
 package binding
 
 import scala.collection.mutable
-import scala.scalanative.runtime.libc
+import scala.scalanative.libc
 import scala.scalanative.unsafe._
 import scala.scalanative.unsigned._
 
@@ -32,11 +32,12 @@ private final class LibYamlDocument(private val document: Ptr[yaml_document_t])
   def clean(): Unit =
     yaml_document_delete(document)
 
-  def visit[T](implicit w: Writer[T]): Option[T] = Zone { implicit zone =>
-    val root = yaml_document_get_root_node(document)
+  def visit[T](implicit w: Writer[T]): Option[T] = Zone.acquire {
+    implicit zone: Zone =>
+      val root = yaml_document_get_root_node(document)
 
-    if (root == null) None
-    else Some(visitNode(document, root))
+      if (root == null) None
+      else Some(visitNode(document, root))
   }
 
   private def visitNode[T](
@@ -58,7 +59,7 @@ private final class LibYamlDocument(private val document: Ptr[yaml_document_t])
   private def stringValue(node: Ptr[struct_scalar_node]): String = {
     val bytes = new Array[Byte](node.length.toInt)
     val value = node.value.asInstanceOf[CString]
-    libc.memcpy(bytes.at(0), value, node.length.toULong)
+    libc.string.memcpy(bytes.at(0), value, node.length.toUSize)
 
     new String(bytes)
   }

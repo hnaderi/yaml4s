@@ -17,36 +17,42 @@
 package dev.hnaderi.yaml4s
 package binding
 
+import scala.scalanative.libc
 import scala.scalanative.runtime
-import scala.scalanative.unsafe._
-import scala.scalanative.unsigned._
+import scala.scalanative.unsafe.*
+import scala.scalanative.unsigned.*
 
-import libyaml._
-import others._
-import definitions._
-import LibyamlPrinter._
+import libyaml.*
+import others.*
+import definitions.*
+import LibyamlPrinter.*
 
 private[yaml4s] trait LibyamlPrinter extends Printer {
 
-  override def print[T: Visitable](t: T): String = Zone { implicit z =>
-    val emitter = struct_yaml_emitter_s()
+  override def print[T: Visitable](t: T): String = Zone.acquire {
+    implicit z: Zone =>
+      val emitter = struct_yaml_emitter_s()
 
-    yaml_emitter_initialize(emitter)
+      yaml_emitter_initialize(emitter)
 
-    val stringBuilder = new java.lang.StringBuilder()
-    yaml_emitter_set_output(emitter, handler(_, _, _), toPtr(stringBuilder))
+      val stringBuilder = new java.lang.StringBuilder()
+      yaml_emitter_set_output(
+        emitter,
+        handler(_, _, _),
+        LibyamlPrinter.toPtr(stringBuilder)
+      )
 
-    val doc = struct_yaml_document_s()
-    yaml_document_initialize(doc, null, null, null, 1, 1)
-    build(doc, t)
+      val doc = struct_yaml_document_s()
+      yaml_document_initialize(doc, null, null, null, 1, 1)
+      build(doc, t)
 
-    yaml_emitter_dump(emitter, doc)
+      yaml_emitter_dump(emitter, doc)
 
-    yaml_emitter_flush(emitter)
-    yaml_emitter_close(emitter)
-    yaml_emitter_delete(emitter)
+      yaml_emitter_flush(emitter)
+      yaml_emitter_close(emitter)
+      yaml_emitter_delete(emitter)
 
-    stringBuilder.toString()
+      stringBuilder.toString()
   }
 
 }
@@ -69,7 +75,7 @@ private object LibyamlPrinter {
 
     val bytes = new Array[Byte](size.toInt)
     val value = buf.asInstanceOf[CString]
-    runtime.libc.memcpy(bytes.at(0), value, size.toULong)
+    libc.string.memcpy(bytes.at(0), value, size.toUSize)
 
     builder.append(new String(bytes))
 

@@ -1,6 +1,8 @@
 // This is a huge build matrix! so it's better to find problems rather than failing prematurely.
+val LTSJava = JavaSpec.temurin("17")
+ThisBuild / githubWorkflowJavaVersions := Seq(LTSJava)
 ThisBuild / githubWorkflowBuildMatrixFailFast := Some(false)
-ThisBuild / tlSiteJavaVersion := JavaSpec.temurin("17")
+ThisBuild / tlSiteJavaVersion := LTSJava
 ThisBuild / githubWorkflowOSes := Seq(
   "ubuntu-latest",
   // "windows-2022", // disable for now, there is some linking problem
