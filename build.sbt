@@ -95,7 +95,7 @@ lazy val tests = module("tests") {
     .settings(
       libraryDependencies ++= Seq(
         "org.scalameta" %%% "munit" % "1.0.0",
-        "org.scalameta" %%% "munit-scalacheck" % "1.0.0-M11"
+        "org.scalameta" %%% "munit-scalacheck" % "1.0.0"
       )
     )
 }
@@ -113,7 +113,7 @@ lazy val circe = module("circe") {
     .dependsOn(core)
     .settings(
       description := "yaml4s integration with circe",
-      libraryDependencies += "io.circe" %%% "circe-core" % "0.14.8"
+      libraryDependencies += "io.circe" %%% "circe-core" % "0.14.9"
     )
 }
 

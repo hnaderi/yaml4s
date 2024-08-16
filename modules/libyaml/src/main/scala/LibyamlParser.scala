@@ -26,8 +26,8 @@ import others._
 
 private[yaml4s] trait LibyamlParser extends Parser {
 
-  override def parse[T: Writer](input: String): Either[Throwable, T] = Zone {
-    implicit zone =>
+  override def parse[T: Writer](input: String): Either[Throwable, T] =
+    Zone.acquire { implicit zone: Zone =>
       val input_c = toCString(input).asInstanceOf[Ptr[CUnsignedChar]]
 
       val parser = struct_yaml_parser_s()
@@ -48,14 +48,14 @@ private[yaml4s] trait LibyamlParser extends Parser {
         yaml_parser_delete(parser)
         result
       }
-  }
+    }
 
   private def handle(result: CInt, err: => Throwable) =
     Either.cond(result != 0, (), err)
 
   override def parseDocuments[T: Writer](
       input: String
-  ): Either[Throwable, Iterable[T]] = Zone { implicit zone =>
+  ): Either[Throwable, Iterable[T]] = Zone.acquire { implicit zone: Zone =>
     val input_c = toCString(input).asInstanceOf[Ptr[CUnsignedChar]]
 
     val parser = struct_yaml_parser_s()
