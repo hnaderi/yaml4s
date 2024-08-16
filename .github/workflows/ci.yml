@@ -386,6 +386,31 @@ jobs:
           modules-ignore: rootjs_3 rootjs_2.13 rootjs_2.12 docs_3 docs_2.13 docs_2.12 yaml4s-tests_sjs1_3 yaml4s-tests_sjs1_2.13 yaml4s-tests_sjs1_2.12 rootjvm_3 rootjvm_2.13 rootjvm_2.12 rootnative_3 rootnative_2.13 rootnative_2.12 yaml4s-tests_3 yaml4s-tests_2.13 yaml4s-tests_2.12 yaml4s-tests_native0.5_3 yaml4s-tests_native0.5_2.13 yaml4s-tests_native0.5_2.12
           configs-ignore: test scala-tool scala-doc-tool test-internal
 
+  validate-steward:
+    name: Validate Steward Config
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        java: [temurin@11]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout current branch (fast)
+        uses: actions/checkout@v4
+
+      - name: Setup Java (temurin@11)
+        id: setup-java-temurin-11
+        if: matrix.java == 'temurin@11'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - uses: coursier/setup-action@v1
+        with:
+          apps: scala-steward
+
+      - run: scala-steward validate-repo-config .scala-steward.conf
+
   post-build:
     name: post build
     needs: [build]
