@@ -1,6 +1,7 @@
 // This is a huge build matrix! so it's better to find problems rather than failing prematurely.
+val PrimaryJava = JavaSpec.temurin("11")
 val LTSJava = JavaSpec.temurin("17")
-ThisBuild / githubWorkflowJavaVersions := Seq(LTSJava)
+ThisBuild / githubWorkflowJavaVersions := Seq(PrimaryJava, LTSJava)
 ThisBuild / githubWorkflowBuildMatrixFailFast := Some(false)
 ThisBuild / tlSiteJavaVersion := LTSJava
 ThisBuild / githubWorkflowOSes := Seq(
