@@ -216,7 +216,7 @@ data:
 // &quot;&quot;&quot;</span></code></pre>
         
         <h3 id="zio-json" class="section"><a class="anchor-link left" href="#zio-json"><i class="icofont-laika link">&#xef71;</i></a>Zio Json</h3>
-        <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">dev</span><span>.</span><span class="identifier">hnaderi</span><span>.</span><span class="identifier">yaml4s</span><span>.</span><span class="identifier">ziojson</span><span>.</span><span class="identifier">_</span><span>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">dev</span><span>.</span><span class="identifier">hnaderi</span><span>.</span><span class="identifier">yaml4s</span><span>.</span><span class="identifier">ziojson</span><span>.</span><span class="identifier">_</span><span>
 </span><span class="keyword">import</span><span> </span><span class="identifier">zio</span><span>.</span><span class="identifier">json</span><span>.</span><span class="identifier">ast</span><span>.</span><span class="type-name">Json</span><span>
 
 </span><span class="type-name">Backend</span><span>.</span><span class="identifier">parse</span><span>[</span><span class="type-name">Json</span><span>](</span><span class="string-literal">&quot;&quot;&quot;
@@ -226,9 +226,7 @@ data:
   - 3
 &quot;&quot;&quot;</span><span>)
 </span><span class="comment">// res4: Either[Throwable, Json] = Right(
-//   Obj(
-//     Chunk.VectorChunk((&quot;data&quot;, Arr(Chunk.VectorChunk(Num(1), Num(2), Num(3)))))
-//   )
+//   Obj(Chunk.Singleton((&quot;data&quot;, Arr(Chunk.VectorChunk(Num(1), Num(2), Num(3))))))
 // )</span></code></pre>
         
         <h3 id="play-json" class="section"><a class="anchor-link left" href="#play-json"><i class="icofont-laika link">&#xef71;</i></a>Play json</h3>
