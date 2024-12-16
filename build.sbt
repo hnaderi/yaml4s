@@ -11,8 +11,6 @@ ThisBuild / developers := List(
   tlGitHubDev("hnaderi", "Hossein Naderi")
 )
 
-ThisBuild / tlSonatypeUseLegacyHost := false
-
 ThisBuild / tlSitePublishBranch := Some("main")
 ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / tlFatalWarnings := false
