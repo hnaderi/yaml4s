@@ -154,7 +154,7 @@ lazy val `zio-json` = module("zio-json") {
     .dependsOn(core)
     .settings(
       description := "yaml4s integration with zio-json",
-      libraryDependencies += "dev.zio" %%% "zio-json" % "0.7.28"
+      libraryDependencies += "dev.zio" %%% "zio-json" % "0.7.30"
     )
 }
 
