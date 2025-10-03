@@ -7,7 +7,6 @@ ThisBuild / tlSiteJavaVersion := LTSJava
 ThisBuild / githubWorkflowOSes := Seq(
   "ubuntu-latest",
   // "windows-2022", // disable for now, there is some linking problem
-  "macos-13",
   "macos-latest"
 )
 
