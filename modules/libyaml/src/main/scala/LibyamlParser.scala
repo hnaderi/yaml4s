@@ -74,7 +74,7 @@ private[yaml4s] trait LibyamlParser extends Parser {
           doc.clean()
 
           t match {
-            case None => Right(result)
+            case None        => Right(result)
             case Some(value) =>
               result.append(value)
               go()

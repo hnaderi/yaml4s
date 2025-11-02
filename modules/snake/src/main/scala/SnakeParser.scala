@@ -79,7 +79,7 @@ private[yaml4s] trait SnakeParser extends Parser {
       val composer = createComposer(reader)
       asScala(composer.getSingleNode)
     } match {
-      case Left(err) => Left(ParsingFailure(err.getMessage, err))
+      case Left(err)   => Left(ParsingFailure(err.getMessage, err))
       case Right(None) =>
         Left(
           ParsingFailure(
@@ -128,8 +128,8 @@ private[yaml4s] trait SnakeParser extends Parser {
         case Tag.INT
             if node.getValue.startsWith("0x") || node.getValue.contains("_") =>
           flattener.construct(node) match {
-            case int: Integer         => w.yint(int)
-            case long: java.lang.Long => w.ylong(long)
+            case int: Integer                 => w.yint(int)
+            case long: java.lang.Long         => w.ylong(long)
             case bigint: java.math.BigInteger =>
               w.ybigdecimal(BigDecimal(bigint))
             case other =>
@@ -145,12 +145,12 @@ private[yaml4s] trait SnakeParser extends Parser {
         case Tag.BOOL =>
           flattener.construct(node) match {
             case b: java.lang.Boolean => w.ybool(b)
-            case _ =>
+            case _                    =>
               throw new IllegalArgumentException(
                 s"Invalid boolean string ${node.getValue}"
               )
           }
-        case Tag.NULL => w.ynull
+        case Tag.NULL         => w.ynull
         case CustomTag(other) =>
           w.yobject(Seq(other.stripPrefix("!") -> w.ystring(node.getValue)))
         case _ => w.ystring(node.getValue)
@@ -161,7 +161,7 @@ private[yaml4s] trait SnakeParser extends Parser {
 
     def convertKeyNode(node: Node) = node match {
       case scalar: ScalarNode => Right(scalar.getValue)
-      case _ =>
+      case _                  =>
         Left(
           ParsingFailure("Only string keys can be represented in JSON", null)
         )
