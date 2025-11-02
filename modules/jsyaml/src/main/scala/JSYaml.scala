@@ -39,11 +39,11 @@ private[yaml4s] trait JSYaml extends YamlBackend {
   private[this] def convertAnyToJsonUnsafe[T](
       input: Any
   )(implicit w: Writer[T]): T = input match {
-    case s: String => w.ystring(s)
-    case n: Double => w.ydouble(n)
-    case true      => w.ytrue
-    case false     => w.yfalse
-    case null      => w.ynull
+    case s: String      => w.ystring(s)
+    case n: Double      => w.ydouble(n)
+    case true           => w.ytrue
+    case false          => w.yfalse
+    case null           => w.ynull
     case a: js.Array[?] =>
       w.yarray(a.map(convertAnyToJsonUnsafe[T](_)).toList)
     case o: js.Object =>
