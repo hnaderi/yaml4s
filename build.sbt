@@ -144,7 +144,7 @@ lazy val json4s = module("json4s") {
     .dependsOn(core)
     .settings(
       description := "yaml4s integration with json4s",
-      libraryDependencies += "io.github.json4s" %%% "json4s-ast" % "4.1.0"
+      libraryDependencies += "io.github.json4s" %%% "json4s-ast" % "4.1.1"
     )
 }
 
